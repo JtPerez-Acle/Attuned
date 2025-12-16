@@ -42,7 +42,7 @@ anyhow = "1.0"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 metrics = "0.24"
-metrics-exporter-prometheus = "0.16"
+metrics-exporter-prometheus = "0.18"
 opentelemetry = "0.27"
 opentelemetry-otlp = "0.27"
 opentelemetry_sdk = { version = "0.27", features = ["rt-tokio"] }
@@ -67,7 +67,7 @@ dashmap = "6.1"
 
 # Testing
 proptest = "1.5"
-criterion = "0.5"
+criterion = "0.8"
 tokio-test = "0.4"
 
 [profile.release]
