@@ -1,6 +1,6 @@
 # Attuned
 
-[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE-MIT)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE-APACHE)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org)
 [![Security](https://img.shields.io/badge/security-audited-green.svg)](SECURITY.md)
 [![Manifesto](https://img.shields.io/badge/manifesto-read-purple.svg)](MANIFESTO.md)
@@ -319,10 +319,10 @@ flowchart LR
 
     subgraph Output
         PC[PromptContext]
-        G[guidelines: Vec<String>]
-        T[tone: String]
-        V[verbosity: Low|Medium|High]
-        F[flags: Vec<String>]
+        G["guidelines: Vec#lt;String#gt;"]
+        T["tone: String"]
+        V["verbosity: Low / Medium / High"]
+        F["flags: Vec#lt;String#gt;"]
     end
 
     SS --> R1 & R2 & R3 & R4 & R5
@@ -576,12 +576,7 @@ cargo clippy --workspace
 
 ## License
 
-Licensed under either of:
-
-- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
-- MIT license ([LICENSE-MIT](LICENSE-MIT))
-
-at your option.
+Licensed under the Apache License, Version 2.0. See [LICENSE-APACHE](LICENSE-APACHE) for details.
 
 ## Contributing
 

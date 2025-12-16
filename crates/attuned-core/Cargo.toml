@@ -1,0 +1,34 @@
+[package]
+name = "attuned-core"
+description = "Core types and traits for Attuned - human state representation for LLM systems"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+chrono = { workspace = true }
+async-trait = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+criterion = { workspace = true }
+tokio = { workspace = true }
+
+[features]
+default = []
+
+[[bench]]
+name = "translator"
+harness = false
+
+[[bench]]
+name = "snapshot"
+harness = false

@@ -1,0 +1,18 @@
+# Security audit configuration
+# Run with: cargo audit
+
+[advisories]
+# Advisories to explicitly ignore
+# RUSTSEC-2025-0134: rustls-pemfile unmaintained warning
+# - This is a transitive dependency of qdrant-client
+# - Qdrant is working on migration to rustls-pem
+# - Not a security vulnerability, just maintenance status warning
+ignore = ["RUSTSEC-2025-0134"]
+
+# Report informational warnings (unmaintained, unsound)
+informational_warnings = ["unmaintained"]
+
+[yanked]
+# Treat yanked crates as vulnerabilities
+enabled = true
+update_index = true
