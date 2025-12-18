@@ -21,7 +21,7 @@ attuned-core = { workspace = true }
 attuned-infer = { workspace = true }
 
 # PyO3 for Python bindings
-pyo3 = { version = "0.23", features = ["extension-module", "abi3-py39"] }
+pyo3 = { version = "0.24", features = ["extension-module", "abi3-py39"] }
 
 # Async support for HTTP client
 tokio = { workspace = true }
@@ -35,7 +35,7 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 
 [build-dependencies]
-pyo3-build-config = "0.23"
+pyo3-build-config = "0.24"
 
 [dev-dependencies]
-pyo3 = { version = "0.23", features = ["auto-initialize"] }
+pyo3 = { version = "0.24", features = ["auto-initialize"] }

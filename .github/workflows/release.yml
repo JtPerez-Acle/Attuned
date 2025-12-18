@@ -7,6 +7,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  # Exclude attuned-python from workspace builds (requires maturin for PyO3 linkage)
+  WORKSPACE_EXCLUDE: --exclude attuned-python
 
 jobs:
   validate:
@@ -22,9 +24,9 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all --check
       - name: Run Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --all-targets --all-features --workspace ${{ env.WORKSPACE_EXCLUDE }} -- -D warnings
       - name: Run tests
-        run: cargo test --all-features --workspace
+        run: cargo test --all-features --workspace ${{ env.WORKSPACE_EXCLUDE }}
 
   create-release:
     name: Create GitHub Release
@@ -195,4 +197,5 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
+          skip-existing: true  # Don't fail if version already exists on PyPI
           # Uses trusted publishing - configure at pypi.org/manage/project/attuned/settings/publishing/

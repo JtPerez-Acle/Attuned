@@ -2,13 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
     branches: [main]
 
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+  # Exclude attuned-python from workspace builds (requires maturin for PyO3 linkage)
+  WORKSPACE_EXCLUDE: --exclude attuned-python
 
 jobs:
   fmt:
@@ -34,7 +36,7 @@ jobs:
           components: clippy
       - uses: Swatinem/rust-cache@v2
       - name: Run Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --all-targets --all-features --workspace ${{ env.WORKSPACE_EXCLUDE }} -- -D warnings
 
   test:
     name: Test
@@ -46,9 +48,9 @@ jobs:
           toolchain: stable
       - uses: Swatinem/rust-cache@v2
       - name: Run tests
-        run: cargo test --all-features --workspace
+        run: cargo test --all-features --workspace ${{ env.WORKSPACE_EXCLUDE }}
       - name: Run tests (no default features)
-        run: cargo test --no-default-features --workspace
+        run: cargo test --no-default-features --workspace ${{ env.WORKSPACE_EXCLUDE }}
 
   doc:
     name: Documentation
@@ -60,7 +62,7 @@ jobs:
           toolchain: stable
       - uses: Swatinem/rust-cache@v2
       - name: Check documentation
-        run: cargo doc --all-features --workspace --no-deps
+        run: cargo doc --all-features --workspace ${{ env.WORKSPACE_EXCLUDE }} --no-deps
         env:
           RUSTDOCFLAGS: -D warnings
 
@@ -78,28 +80,32 @@ jobs:
           toolchain: stable
       - uses: Swatinem/rust-cache@v2
       - name: Build
-        run: cargo build --all-features --workspace
+        run: cargo build --all-features --workspace ${{ env.WORKSPACE_EXCLUDE }}
 
   msrv:
-    name: MSRV (1.75)
+    name: MSRV (1.83)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: "1.75"
+          toolchain: "1.83"
       - uses: Swatinem/rust-cache@v2
       - name: Check MSRV
-        run: cargo check --all-features --workspace
+        # Exclude attuned-qdrant too (qdrant-client uses unstable features in newer versions)
+        run: cargo check --all-features --workspace ${{ env.WORKSPACE_EXCLUDE }} --exclude attuned-qdrant
 
   audit:
     name: Security Audit
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - uses: actions/checkout@v4
-      - uses: rustsec/audit-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: taiki-e/install-action@cargo-audit
+      - name: Run security audit
+        run: cargo audit
 
   coverage:
     name: Coverage
@@ -113,7 +119,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@cargo-llvm-cov
       - name: Generate coverage
-        run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+        run: cargo llvm-cov --all-features --workspace ${{ env.WORKSPACE_EXCLUDE }} --lcov --output-path lcov.info
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
