@@ -162,11 +162,16 @@ jobs:
         run: |
           cd crates/attuned-python
           maturin sdist
+      - name: List built files
+        run: |
+          echo "Contents of target/wheels:"
+          ls -la crates/attuned-python/target/wheels/ || echo "Directory not found"
       - name: Upload sdist artifact
         uses: actions/upload-artifact@v4
         with:
           name: sdist
           path: crates/attuned-python/target/wheels/*.tar.gz
+          if-no-files-found: error
 
   publish-pypi:
     name: Publish to PyPI
