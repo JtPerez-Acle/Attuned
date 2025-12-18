@@ -104,18 +104,18 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           cd target/${{ matrix.target }}/release
-          tar czvf ../../../attuned-cli-${{ matrix.target }}.tar.gz attuned-cli
+          tar czvf ../../../attuned-${{ matrix.target }}.tar.gz attuned
       - name: Package (Windows)
         if: runner.os == 'Windows'
         run: |
           cd target/${{ matrix.target }}/release
-          7z a ../../../attuned-cli-${{ matrix.target }}.zip attuned-cli.exe
+          7z a ../../../attuned-${{ matrix.target }}.zip attuned.exe
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            attuned-cli-*.tar.gz
-            attuned-cli-*.zip
+            attuned-*.tar.gz
+            attuned-*.zip
 
   build-python-wheels:
     name: Build Python Wheels
