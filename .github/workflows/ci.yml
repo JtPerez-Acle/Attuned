@@ -16,8 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: stable
           components: rustfmt
       - name: Check formatting
         run: cargo fmt --all --check
@@ -27,8 +28,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: stable
           components: clippy
       - uses: Swatinem/rust-cache@v2
       - name: Run Clippy
@@ -39,7 +41,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
       - uses: Swatinem/rust-cache@v2
       - name: Run tests
         run: cargo test --all-features --workspace
@@ -51,7 +55,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
       - uses: Swatinem/rust-cache@v2
       - name: Check documentation
         run: cargo doc --all-features --workspace --no-deps
@@ -67,7 +73,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
       - uses: Swatinem/rust-cache@v2
       - name: Build
         run: cargo build --all-features --workspace
@@ -77,7 +85,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.75
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.75"
       - uses: Swatinem/rust-cache@v2
       - name: Check MSRV
         run: cargo check --all-features --workspace
@@ -96,8 +106,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: stable
           components: llvm-tools-preview
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@cargo-llvm-cov
