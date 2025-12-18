@@ -112,3 +112,78 @@ jobs:
           files: |
             attuned-cli-*.tar.gz
             attuned-cli-*.zip
+
+  build-python-wheels:
+    name: Build Python Wheels
+    needs: validate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install maturin
+        run: pip install maturin
+      - name: Build wheel
+        run: |
+          cd crates/attuned-python
+          maturin build --release --strip
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: crates/attuned-python/target/wheels/*.whl
+
+  build-python-sdist:
+    name: Build Python Source Distribution
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install maturin
+        run: pip install maturin
+      - name: Build sdist
+        run: |
+          cd crates/attuned-python
+          maturin sdist
+      - name: Upload sdist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: crates/attuned-python/target/wheels/*.tar.gz
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: [build-python-wheels, build-python-sdist]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # For trusted publishing
+    steps:
+      - name: Download all wheel artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheel-*
+          path: dist
+          merge-multiple: true
+      - name: Download sdist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist
+      - name: List distribution files
+        run: ls -la dist/
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          # Uses trusted publishing - configure at pypi.org/manage/project/attuned/settings/publishing/

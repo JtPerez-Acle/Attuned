@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "attuned"
-version = "0.1.0"
+version = "1.0.0"
 description = "Human state to LLM context translation - Python bindings for the Attuned framework"
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -28,10 +28,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/attuned-dev/attuned"
-Documentation = "https://github.com/attuned-dev/attuned#readme"
-Repository = "https://github.com/attuned-dev/attuned"
-Issues = "https://github.com/attuned-dev/attuned/issues"
+Homepage = "https://github.com/JtPerez-Acle/Attuned"
+Documentation = "https://github.com/JtPerez-Acle/Attuned#readme"
+Repository = "https://github.com/JtPerez-Acle/Attuned"
+Issues = "https://github.com/JtPerez-Acle/Attuned/issues"
 
 [project.optional-dependencies]
 dev = [

@@ -89,7 +89,7 @@ from attuned._attuned import (
 # Simple API - the primary interface
 from attuned.core import Attuned, Presets
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __all__ = [
     # Simple API (recommended)
     "Attuned",

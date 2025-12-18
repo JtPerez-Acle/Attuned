@@ -1,11 +1,62 @@
 """Type stubs for attuned."""
 
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 from enum import IntEnum
 
 __version__: str
 
+# =============================================================================
+# Simple API (recommended)
+# =============================================================================
+
+class Attuned:
+    """
+    Universal LLM behavioral layer.
+
+    Declare human state using any of the 23 axes. Get a prompt context
+    that conditions LLM behavior appropriately.
+
+    Example:
+        >>> state = Attuned(verbosity_preference=0.2, warmth=0.9)
+        >>> print(state.prompt())
+    """
+
+    presets: "Presets"
+
+    def __init__(self, user_id: str = "default", **axes: float) -> None: ...
+    def prompt(self) -> str: ...
+    def context(self) -> "PromptContext": ...
+
+    @staticmethod
+    def axes() -> List[str]: ...
+    @staticmethod
+    def axis_info(name: str) -> Dict[str, Any]: ...
+
+    def __repr__(self) -> str: ...
+
+
+class Presets:
+    """Pre-configured Attuned states for common scenarios."""
+
+    @staticmethod
+    def anxious_user() -> Attuned: ...
+    @staticmethod
+    def busy_executive() -> Attuned: ...
+    @staticmethod
+    def learning_student() -> Attuned: ...
+    @staticmethod
+    def casual_chat() -> Attuned: ...
+    @staticmethod
+    def high_stakes() -> Attuned: ...
+    @staticmethod
+    def overwhelmed() -> Attuned: ...
+    @staticmethod
+    def privacy_conscious() -> Attuned: ...
+
+
+# =============================================================================
 # Enums
+# =============================================================================
 
 class Source(IntEnum):
     """Source of a state snapshot."""

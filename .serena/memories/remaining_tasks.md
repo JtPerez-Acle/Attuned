@@ -2,48 +2,47 @@
 
 ## v1.0.0 Critical Path
 
-### 1. TASK-014: Python Bindings (CRITICAL) - 90% COMPLETE
+### 1. TASK-014: Python Bindings (CRITICAL) - COMPLETE
 **File**: `tasks/TASK-014-python-bindings.md`
-**Status**: In Progress (near completion)
-**Effort**: ~2 hours remaining
-**Why**: Python is the primary user interface for v1.0.0 release
+**Status**: Complete
 
-**Completed (2025-12-18)**:
-- ✅ PyO3 bindings for core types (StateSnapshot, PromptContext, axes)
-- ✅ RuleTranslator wrapper
-- ✅ HTTP client (AttunedClient) for distributed deployments
-- ✅ Simple "Attuned" class with all 23 axes (universal API)
-- ✅ Integration wrappers: OpenAI, Anthropic, LiteLLM (100+ providers)
-- ✅ 7 presets for common patterns
-- ✅ README documentation
-- ✅ Fixed translator guidelines (warmth, formality, verbosity, anxiety)
+**Delivered:**
+- PyO3 bindings for all core types
+- Simple `Attuned` class with 23 axes
+- 7 presets for common patterns
+- OpenAI/Anthropic/LiteLLM integrations
+- Type stubs (.pyi) for IDE autocomplete
+- GitHub Actions workflow for wheel building + PyPI publishing
 
-**Remaining**:
-- [ ] Type stubs (.pyi) for full IDE autocomplete
-- [ ] CI/CD wheel building
-- [ ] PyPI publishing
+### 2. TASK-019: Split-Screen Demo (CRITICAL) - COMPLETE
+**File**: `tasks/TASK-019-split-screen-demo.md`
+**Status**: Complete
+**Location**: `examples/demo/streamlit_app.py`
 
-**Validation Results (2025-12-18):** 11/13 tests passed (85%)
-- Verbosity: d=7.40 (massive effect)
-- Tone: d=4.11 (warm), d=0.83 (formal)  
-- Cognitive load: d=1.90 (large)
-- Combined conditions work correctly
+**Validated Results:**
+- Anxious Decision: 395 → 64 tokens (84% reduction)
+- Curious Learner: Detailed but better structured
+- Demo shows value proposition in <30 seconds
+**Why**: The "aha moment" demo that sells Attuned in 30 seconds
 
-### 2. TASK-018: Demo & Showcase (CRITICAL)
-**File**: `tasks/TASK-018-demo-showcase.md`
-**Status**: In Progress
-**Effort**: ~4 hours
-**Why**: Video-ready demo validates the complete system; required for v1.0.0
+**Tagline**: "Your LLM can't tell when users are frustrated. Now it can."
 
-**Scope**:
-- End-to-end demo script
-- Python example application
-- Documentation polish
-- Recording-ready environment
+**Concept**:
+- Split-screen: vanilla LLM vs Attuned (same model, same prompt)
+- Real-time axis detection from user messages
+- Manual sliders to toggle axes and regenerate
+- Self-serve: bring your own API key
+- Copy-paste integration code
 
-### 3. TASK-011: Release v1.0 (Blocked)
+**The moment**: User types frustrated message → axes light up → 
+vanilla gives 400 tokens of steps → Attuned gives "That's exhausting. 
+Let's fix this fast - what are you seeing?"
+
+Supersedes TASK-018 (generic demo approach)
+
+### 3. TASK-011: Release v1.0 (Ready)
 **File**: `tasks/TASK-011-release-v1.md`
-**Status**: Blocked on TASK-014, TASK-018
+**Status**: Ready (TASK-019 complete, TASK-014 at 90%)
 **Effort**: ~2 hours
 **Why**: Final release after Python bindings and demo complete
 

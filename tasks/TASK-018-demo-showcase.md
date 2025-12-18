@@ -2,16 +2,20 @@
 
 ## Status
 - [ ] Not Started
-- [x] In Progress
+- [ ] In Progress
 - [ ] Completed
-- [ ] Blocked
+- [x] Superseded by TASK-019
 
-**Priority**: **Critical** (Required for v1.0.0)
+**Priority**: Low (Superseded)
 **Created**: 2025-12-18
 **Last Updated**: 2025-12-18
 **Phase**: 6 - DevOps & Release
 **Depends On**: TASK-014 (Python bindings)
-**Blocks**: TASK-011 (Release v1.0)
+**Superseded By**: **TASK-019** (Split-Screen Demo - better approach)
+
+> **NOTE**: This task has been superseded by TASK-019 which defines a more compelling
+> "split-screen comparison" demo that better demonstrates Attuned's value proposition.
+> See [TASK-019-split-screen-demo.md](TASK-019-split-screen-demo.md) for the new approach.
 
 ## Task Description
 
