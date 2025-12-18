@@ -16,6 +16,9 @@ use axum::{
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
 
+#[cfg(feature = "inference")]
+use crate::handlers::infer;
+
 /// HTTP server for the Attuned API.
 pub struct Server<S: StateStore + HealthCheck> {
     state: Arc<AppState<S>>,
@@ -25,15 +28,22 @@ pub struct Server<S: StateStore + HealthCheck> {
 impl<S: StateStore + HealthCheck + 'static> Server<S> {
     /// Create a new server with the given store and configuration.
     pub fn new(store: S, config: ServerConfig) -> Self {
-        Self {
-            state: Arc::new(AppState::new(store)),
-            config,
-        }
+        #[cfg(feature = "inference")]
+        let state = if config.enable_inference {
+            Arc::new(AppState::with_inference(store, config.inference_config.clone()))
+        } else {
+            Arc::new(AppState::new(store))
+        };
+        #[cfg(not(feature = "inference"))]
+        let state = Arc::new(AppState::new(store));
+
+        Self { state, config }
     }
 
     /// Build the router with all routes.
     pub fn router(&self) -> Router {
-        let mut router = Router::new()
+        // Build routes with typed state
+        let typed_router = Router::new()
             // State management
             .route("/v1/state", post(upsert_state::<S>))
             .route("/v1/state/{user_id}", get(get_state::<S>))
@@ -43,9 +53,14 @@ impl<S: StateStore + HealthCheck + 'static> Server<S> {
             .route("/v1/translate", post(translate::<S>))
             // Operations
             .route("/health", get(health::<S>))
-            .route("/ready", get(ready::<S>))
-            // Application state
-            .with_state(self.state.clone());
+            .route("/ready", get(ready::<S>));
+
+        // Add inference endpoint if feature enabled
+        #[cfg(feature = "inference")]
+        let typed_router = typed_router.route("/v1/infer", post(infer::<S>));
+
+        // Apply state and convert to Router<()>
+        let mut router = typed_router.with_state(self.state.clone());
 
         // Add security headers middleware (outermost layer, runs last on request, first on response)
         if self.config.security_headers {

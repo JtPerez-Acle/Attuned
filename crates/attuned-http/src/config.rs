@@ -4,6 +4,9 @@ use crate::middleware::{AuthConfig, RateLimitConfig};
 use std::net::SocketAddr;
 use std::time::Duration;
 
+#[cfg(feature = "inference")]
+use attuned_infer::InferenceConfig;
+
 /// Configuration for the HTTP server.
 #[derive(Clone, Debug)]
 pub struct ServerConfig {
@@ -34,6 +37,16 @@ pub struct ServerConfig {
     /// Enable security headers.
     /// Default: true
     pub security_headers: bool,
+
+    /// Enable automatic inference from message text.
+    /// Default: false (requires "inference" feature)
+    #[cfg(feature = "inference")]
+    pub enable_inference: bool,
+
+    /// Inference engine configuration.
+    /// Default: None (uses InferenceConfig::default())
+    #[cfg(feature = "inference")]
+    pub inference_config: Option<InferenceConfig>,
 }
 
 impl Default for ServerConfig {
@@ -47,6 +60,10 @@ impl Default for ServerConfig {
             auth: AuthConfig::default(),
             rate_limit: RateLimitConfig::default(),
             security_headers: true,
+            #[cfg(feature = "inference")]
+            enable_inference: false,
+            #[cfg(feature = "inference")]
+            inference_config: None,
         }
     }
 }
@@ -68,6 +85,21 @@ impl ServerConfig {
     pub fn with_rate_limit(mut self, max_requests: u32, window_secs: u64) -> Self {
         self.rate_limit.max_requests = max_requests;
         self.rate_limit.window = Duration::from_secs(window_secs);
+        self
+    }
+
+    /// Enable inference from message text.
+    #[cfg(feature = "inference")]
+    pub fn with_inference(mut self) -> Self {
+        self.enable_inference = true;
+        self
+    }
+
+    /// Enable inference with custom configuration.
+    #[cfg(feature = "inference")]
+    pub fn with_inference_config(mut self, config: InferenceConfig) -> Self {
+        self.enable_inference = true;
+        self.inference_config = Some(config);
         self
     }
 }

@@ -6,6 +6,7 @@ members = [
     "crates/attuned-qdrant",
     "crates/attuned-http",
     "crates/attuned-cli",
+    "crates/attuned-infer",
 ]
 
 [workspace.package]
@@ -25,6 +26,7 @@ attuned-core = { path = "crates/attuned-core", version = "0.1.0" }
 attuned-store = { path = "crates/attuned-store", version = "0.1.0" }
 attuned-qdrant = { path = "crates/attuned-qdrant", version = "0.1.0" }
 attuned-http = { path = "crates/attuned-http", version = "0.1.0" }
+attuned-infer = { path = "crates/attuned-infer", version = "0.1.0" }
 
 # Async runtime
 tokio = { version = "1.40", features = ["full"] }
