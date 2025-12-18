@@ -1,6 +1,7 @@
 [package]
 name = "attuned-core"
 description = "Core types and traits for Attuned - human state representation for LLM systems"
+readme = "README.md"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

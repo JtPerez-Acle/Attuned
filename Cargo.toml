@@ -11,7 +11,7 @@ members = [
 ]
 
 [workspace.package]
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 rust-version = "1.83"
 license = "Apache-2.0"
@@ -23,11 +23,11 @@ categories = ["data-structures", "api-bindings"]
 
 [workspace.dependencies]
 # Internal crates
-attuned-core = { path = "crates/attuned-core", version = "1.0.0" }
-attuned-store = { path = "crates/attuned-store", version = "1.0.0" }
-attuned-qdrant = { path = "crates/attuned-qdrant", version = "1.0.0" }
-attuned-http = { path = "crates/attuned-http", version = "1.0.0" }
-attuned-infer = { path = "crates/attuned-infer", version = "1.0.0" }
+attuned-core = { path = "crates/attuned-core", version = "1.0.1" }
+attuned-store = { path = "crates/attuned-store", version = "1.0.1" }
+attuned-qdrant = { path = "crates/attuned-qdrant", version = "1.0.1" }
+attuned-http = { path = "crates/attuned-http", version = "1.0.1" }
+attuned-infer = { path = "crates/attuned-infer", version = "1.0.1" }
 
 # Async runtime
 tokio = { version = "1.40", features = ["full"] }
