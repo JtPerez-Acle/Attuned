@@ -151,10 +151,15 @@ impl Translator for RuleTranslator {
             flags.push("high_urgency".to_string());
         }
 
-        // Anxiety rules
+        // Anxiety rules - MUST be specific and prominent to work
         let anxiety = get("anxiety_level");
         if anxiety > hi {
-            guidelines.push("Provide reassurance; acknowledge concerns".to_string());
+            guidelines.push(
+                "IMPORTANT: The user may be feeling anxious. Begin responses by acknowledging their feelings \
+                (e.g., 'I understand this feels overwhelming' or 'It's completely normal to feel uncertain'). \
+                Use a calm, supportive tone throughout. Avoid adding pressure or urgency."
+                    .to_string(),
+            );
             flags.push("high_anxiety".to_string());
         }
 
@@ -201,6 +206,37 @@ impl Translator for RuleTranslator {
         // Determine tone based on warmth and formality
         let warmth = get("warmth");
         let formality = get("formality");
+
+        // Add explicit warmth guidelines - tone label alone isn't enough
+        if warmth > hi {
+            guidelines.push(
+                "Use warm, friendly language. Include encouraging phrases like 'Great question!' \
+                or 'I'd be happy to help!'. Show enthusiasm and empathy."
+                    .to_string(),
+            );
+        } else if warmth < lo {
+            guidelines.push(
+                "Keep tone neutral and matter-of-fact. Avoid enthusiastic language, exclamations, \
+                or excessive friendliness. Be helpful but not effusive."
+                    .to_string(),
+            );
+        }
+
+        // Add explicit formality guidelines
+        if formality > hi {
+            guidelines.push(
+                "Use professional, formal language. Avoid contractions (use 'do not' instead of 'don't'). \
+                Use complete sentences and proper structure. Address topics with appropriate gravity."
+                    .to_string(),
+            );
+        } else if formality < lo {
+            guidelines.push(
+                "Use casual, conversational language. Contractions are fine. \
+                Keep it relaxed and approachable, like talking to a friend."
+                    .to_string(),
+            );
+        }
+
         let tone = match (warmth > hi, formality > hi) {
             (true, true) => "warm-formal".to_string(),
             (true, false) => "warm-casual".to_string(),
@@ -208,11 +244,21 @@ impl Translator for RuleTranslator {
             (false, false) => "calm-neutral".to_string(),
         };
 
-        // Determine verbosity
+        // Determine verbosity with explicit guidelines
         let verbosity_pref = get("verbosity_preference");
         let verbosity = if verbosity_pref < lo {
+            guidelines.push(
+                "Keep responses brief and to the point. Use short paragraphs or bullet points. \
+                Aim for the minimum words needed to be helpful."
+                    .to_string(),
+            );
             Verbosity::Low
         } else if verbosity_pref > hi {
+            guidelines.push(
+                "Provide comprehensive, detailed responses. Include context, examples, and thorough explanations. \
+                Don't leave out relevant information for the sake of brevity."
+                    .to_string(),
+            );
             Verbosity::High
         } else {
             Verbosity::Medium

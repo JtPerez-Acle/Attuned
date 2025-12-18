@@ -15,6 +15,13 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::time::Instant;
 
+#[cfg(feature = "inference")]
+use attuned_infer::{Baseline, InferenceConfig, InferenceEngine, InferenceSource};
+#[cfg(feature = "inference")]
+use dashmap::DashMap;
+#[cfg(feature = "inference")]
+use std::collections::HashMap;
+
 /// Application state shared across handlers.
 pub struct AppState<S: StateStore> {
     /// The state store backend.
@@ -23,6 +30,12 @@ pub struct AppState<S: StateStore> {
     pub translator: Arc<dyn Translator>,
     /// Server start time for uptime calculation.
     pub start_time: Instant,
+    /// Inference engine (optional, requires "inference" feature).
+    #[cfg(feature = "inference")]
+    pub inference_engine: Option<InferenceEngine>,
+    /// Per-user baselines for delta analysis.
+    #[cfg(feature = "inference")]
+    pub baselines: Arc<DashMap<String, Baseline>>,
 }
 
 impl<S: StateStore> AppState<S> {
@@ -32,6 +45,26 @@ impl<S: StateStore> AppState<S> {
             store: Arc::new(store),
             translator: Arc::new(RuleTranslator::default()),
             start_time: Instant::now(),
+            #[cfg(feature = "inference")]
+            inference_engine: None,
+            #[cfg(feature = "inference")]
+            baselines: Arc::new(DashMap::new()),
+        }
+    }
+
+    /// Create application state with inference enabled.
+    #[cfg(feature = "inference")]
+    pub fn with_inference(store: S, config: Option<InferenceConfig>) -> Self {
+        let engine = match config {
+            Some(c) => InferenceEngine::with_config(c),
+            None => InferenceEngine::default(),
+        };
+        Self {
+            store: Arc::new(store),
+            translator: Arc::new(RuleTranslator::default()),
+            start_time: Instant::now(),
+            inference_engine: Some(engine),
+            baselines: Arc::new(DashMap::new()),
         }
     }
 }
@@ -49,6 +82,11 @@ pub struct UpsertStateRequest {
     pub confidence: f32,
     /// Axis values to set.
     pub axes: std::collections::BTreeMap<String, f32>,
+    /// Optional message text for inference (requires "inference" feature).
+    /// When provided, axes are inferred from the message and merged with explicit axes.
+    /// Explicit axes always override inferred values.
+    #[serde(default)]
+    pub message: Option<String>,
 }
 
 fn default_confidence() -> f32 {
@@ -139,15 +177,45 @@ impl ErrorResponse {
 
 /// POST /v1/state - Upsert state
 #[tracing::instrument(skip(state, body))]
+#[allow(unused_mut)] // mut needed when inference feature is enabled
 pub async fn upsert_state<S: StateStore + 'static>(
     State(state): State<Arc<AppState<S>>>,
     Json(body): Json<UpsertStateRequest>,
 ) -> impl IntoResponse {
+    let mut axes = body.axes;
+    let mut source: Source = body.source.into();
+
+    // Run inference if enabled and message provided
+    #[cfg(feature = "inference")]
+    if let (Some(engine), Some(message)) = (&state.inference_engine, &body.message) {
+        // Get or create baseline for user
+        let mut baseline_ref = state
+            .baselines
+            .entry(body.user_id.clone())
+            .or_insert_with(|| engine.new_baseline());
+
+        // Run inference with baseline
+        let inferred = engine.infer_with_baseline(message, &mut baseline_ref, None);
+
+        // Merge: explicit axes override inferred
+        for estimate in inferred.all() {
+            if !axes.contains_key(&estimate.axis) {
+                // Only use inferred if not explicitly provided
+                axes.insert(estimate.axis.clone(), estimate.value);
+            }
+        }
+
+        // Mark source as mixed if we used inference
+        if !inferred.is_empty() && source == Source::SelfReport {
+            source = Source::Mixed;
+        }
+    }
+
     let snapshot = match StateSnapshot::builder()
         .user_id(&body.user_id)
-        .source(body.source.into())
+        .source(source)
         .confidence(body.confidence)
-        .axes(body.axes.into_iter())
+        .axes(axes.into_iter())
         .build()
     {
         Ok(s) => s,
@@ -329,4 +397,188 @@ impl From<PromptContext> for ContextResponse {
             flags: c.flags,
         }
     }
+}
+
+// ============================================================================
+// Inference endpoint (requires "inference" feature)
+// ============================================================================
+
+/// Request body for inference endpoint.
+#[cfg(feature = "inference")]
+#[derive(Debug, Deserialize)]
+pub struct InferRequest {
+    /// The message text to analyze.
+    pub message: String,
+    /// Optional user ID for baseline comparison.
+    /// If provided, the user's baseline will be updated.
+    #[serde(default)]
+    pub user_id: Option<String>,
+    /// Include debug feature information in response.
+    #[serde(default)]
+    pub include_features: bool,
+}
+
+/// A single axis estimate in the inference response.
+#[cfg(feature = "inference")]
+#[derive(Debug, Serialize)]
+pub struct InferEstimate {
+    /// The axis name.
+    pub axis: String,
+    /// Estimated value in [0.0, 1.0].
+    pub value: f32,
+    /// Confidence in this estimate.
+    pub confidence: f32,
+    /// Source of this inference.
+    pub source: InferSourceResponse,
+}
+
+/// Inference source for API response.
+#[cfg(feature = "inference")]
+#[derive(Debug, Serialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum InferSourceResponse {
+    /// Inferred from linguistic features.
+    Linguistic {
+        /// Features that contributed to this inference.
+        features_used: Vec<String>,
+    },
+    /// Inferred from deviation from baseline.
+    Delta {
+        /// Z-score deviation from baseline.
+        z_score: f32,
+        /// Which metric showed deviation.
+        metric: String,
+    },
+    /// Combined from multiple sources.
+    Combined {
+        /// Number of sources combined.
+        source_count: usize,
+    },
+    /// Prior/default value.
+    Prior {
+        /// Reason for this prior.
+        reason: String,
+    },
+}
+
+#[cfg(feature = "inference")]
+impl From<&InferenceSource> for InferSourceResponse {
+    fn from(source: &InferenceSource) -> Self {
+        match source {
+            InferenceSource::Linguistic { features_used, .. } => InferSourceResponse::Linguistic {
+                features_used: features_used.clone(),
+            },
+            InferenceSource::Delta {
+                z_score, metric, ..
+            } => InferSourceResponse::Delta {
+                z_score: *z_score,
+                metric: metric.clone(),
+            },
+            InferenceSource::Combined { sources, .. } => InferSourceResponse::Combined {
+                source_count: sources.len(),
+            },
+            InferenceSource::Prior { reason } => InferSourceResponse::Prior {
+                reason: reason.clone(),
+            },
+            InferenceSource::Decayed { original, .. } => {
+                // Unwrap to original source
+                InferSourceResponse::from(original.as_ref())
+            }
+            InferenceSource::SelfReport => {
+                // Shouldn't happen in inference, but handle gracefully
+                InferSourceResponse::Prior {
+                    reason: "self_report".into(),
+                }
+            }
+        }
+    }
+}
+
+/// Response for inference endpoint.
+#[cfg(feature = "inference")]
+#[derive(Debug, Serialize)]
+pub struct InferResponse {
+    /// Estimated axes.
+    pub estimates: Vec<InferEstimate>,
+    /// Debug feature information (if requested).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub features: Option<HashMap<String, serde_json::Value>>,
+}
+
+/// POST /v1/infer - Infer axes from message text without storage
+#[cfg(feature = "inference")]
+#[tracing::instrument(skip(state, body))]
+pub async fn infer<S: StateStore + 'static>(
+    State(state): State<Arc<AppState<S>>>,
+    Json(body): Json<InferRequest>,
+) -> impl IntoResponse {
+    let Some(engine) = &state.inference_engine else {
+        return (
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(ErrorResponse::new(
+                "INFERENCE_DISABLED",
+                "Inference is not enabled on this server",
+            )),
+        )
+            .into_response();
+    };
+
+    // Run inference with optional baseline
+    let inferred = if let Some(user_id) = &body.user_id {
+        let mut baseline_ref = state
+            .baselines
+            .entry(user_id.clone())
+            .or_insert_with(|| engine.new_baseline());
+        engine.infer_with_baseline(&body.message, &mut baseline_ref, None)
+    } else {
+        engine.infer(&body.message)
+    };
+
+    // Convert to response format
+    let estimates: Vec<InferEstimate> = inferred
+        .all()
+        .map(|est| InferEstimate {
+            axis: est.axis.clone(),
+            value: est.value,
+            confidence: est.confidence,
+            source: InferSourceResponse::from(&est.source),
+        })
+        .collect();
+
+    // Include features if requested
+    let features = if body.include_features {
+        let extractor = attuned_infer::LinguisticExtractor::new();
+        let f = extractor.extract(&body.message);
+        let mut map = HashMap::new();
+        map.insert("word_count".into(), serde_json::json!(f.word_count));
+        map.insert("sentence_count".into(), serde_json::json!(f.sentence_count));
+        map.insert("hedge_count".into(), serde_json::json!(f.hedge_count));
+        map.insert(
+            "urgency_word_count".into(),
+            serde_json::json!(f.urgency_word_count),
+        );
+        map.insert(
+            "negative_emotion_count".into(),
+            serde_json::json!(f.negative_emotion_count),
+        );
+        map.insert(
+            "exclamation_ratio".into(),
+            serde_json::json!(f.exclamation_ratio),
+        );
+        map.insert("question_ratio".into(), serde_json::json!(f.question_ratio));
+        map.insert("caps_ratio".into(), serde_json::json!(f.caps_ratio));
+        map.insert(
+            "first_person_ratio".into(),
+            serde_json::json!(f.first_person_ratio),
+        );
+        Some(map)
+    } else {
+        None
+    };
+
+    Json(InferResponse {
+        estimates,
+        features,
+    })
+    .into_response()
 }

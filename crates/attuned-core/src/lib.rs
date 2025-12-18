@@ -49,8 +49,8 @@ mod translator;
 mod types;
 
 pub use axes::{
-    Axis, AxisCategory, AxisDefinition, DeprecationInfo, CANONICAL_AXES,
-    get_axis, is_valid_axis_name,
+    get_axis, is_valid_axis_name, Axis, AxisCategory, AxisDefinition, DeprecationInfo,
+    CANONICAL_AXES,
 };
 pub use error::{AttunedError, ValidationError};
 pub use snapshot::{StateSnapshot, StateSnapshotBuilder};

@@ -1,11 +1,68 @@
 # Attuned
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE-APACHE)
+[![PyPI](https://img.shields.io/badge/pypi-attuned-blue.svg)](https://pypi.org/project/attuned/)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org)
-[![Security](https://img.shields.io/badge/security-audited-green.svg)](SECURITY.md)
+[![Validated](https://img.shields.io/badge/validated-85%25-brightgreen.svg)](#statistical-validation)
 [![Manifesto](https://img.shields.io/badge/manifesto-read-purple.svg)](MANIFESTO.md)
 
-**Attuned** is a minimal, Rust-first framework for representing human state as interpretable vectors and translating that state into machine-consumable interaction constraints for LLM/agent systems.
+**Declare human state. Get appropriate AI behavior.**
+
+Attuned is the behavioral layer for LLM applications. Set user context, get conditioned responses. Works with any LLM.
+
+```bash
+pip install attuned
+```
+
+## Quick Start (Python)
+
+```python
+from attuned import Attuned
+
+# Declare user state - set what you need, rest defaults to neutral
+state = Attuned(
+    verbosity_preference=0.2,  # Brief responses
+    warmth=0.9,                # Warm and friendly
+)
+
+# Get prompt context - works with ANY LLM
+system_prompt = f"You are an assistant.\n\n{state.prompt()}"
+
+# Use with OpenAI, Anthropic, Ollama, or any LLM
+response = openai.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": "How do I learn Python?"}
+    ]
+)
+```
+
+### With Presets
+
+```python
+from attuned import Attuned
+
+state = Attuned.presets.anxious_user()    # Warm, reassuring, not overwhelming
+state = Attuned.presets.busy_executive()  # Brief, formal, direct
+state = Attuned.presets.learning_student() # Detailed, patient, educational
+```
+
+### With Integrations
+
+```python
+from attuned import Attuned
+from attuned.integrations.openai import AttunedOpenAI
+
+client = AttunedOpenAI(state=Attuned(verbosity_preference=0.2))
+response = client.chat("How do I learn Python?")
+```
+
+---
+
+## What is Attuned?
+
+Attuned is a Rust-first framework for representing human state as interpretable vectors (23 axes) and translating that state into machine-consumable interaction constraints.
 
 This is **not** a chatbot, **not** an agent, and **not** an automation engine. It produces *context*, not actions.
 
@@ -24,6 +81,12 @@ graph TB
             MW[Middleware<br/>Security · Rate Limit · Auth]
         end
 
+        subgraph "attuned-infer"
+            INF[InferenceEngine]
+            LING[LinguisticExtractor]
+            BAYES[BayesianUpdater]
+        end
+
         subgraph "attuned-core"
             SS[StateSnapshot]
             TR[Translator]
@@ -35,25 +98,22 @@ graph TB
             ST[StateStore Trait]
             MS[MemoryStore]
         end
-
-        subgraph "attuned-qdrant"
-            QS[QdrantStore]
-        end
     end
 
     subgraph "Storage"
         MEM[(In-Memory)]
-        QDB[(Qdrant)]
     end
 
     APP -->|"POST /v1/state"| API
+    APP -->|"POST /v1/infer"| API
     API --> MW
+    MW --> INF
+    INF --> LING
+    INF --> BAYES
     MW --> SS
     SS --> ST
     ST --> MS
-    ST --> QS
     MS --> MEM
-    QS --> QDB
 
     APP -->|"GET /v1/context/{id}"| API
     API --> TR
@@ -63,32 +123,52 @@ graph TB
     AX -.->|defines| SS
 ```
 
-## Data Flow
+## Key Features
 
-```mermaid
-sequenceDiagram
-    participant App as Your Application
-    participant API as Attuned API
-    participant Store as StateStore
-    participant Translator as RuleTranslator
-    participant LLM as LLM System
+- **23-Axis Human State Model**: Interpretable dimensions across cognitive, emotional, social, preference, control, and safety categories
+- **Works with ANY LLM**: Output is a string that injects into any system prompt
+- **Statistically Validated**: 85% of behavioral effects pass rigorous hypothesis testing
+- **Fast NLP Inference** (<500μs): Infer state from natural language without LLMs
+- **Research-Validated**: Anxiety detection validated against Dreaddit dataset (F1=0.68)
+- **Self-Report Sovereignty**: Explicit values always override inference (max inference confidence: 0.7)
 
-    Note over App,LLM: State Capture Flow
-    App->>API: POST /v1/state<br/>{user_id, axes, source}
-    API->>API: Validate inputs
-    API->>Store: upsert_latest(snapshot)
-    Store-->>API: Ok(())
-    API-->>App: 204 No Content
+## Statistical Validation
 
-    Note over App,LLM: Context Retrieval Flow
-    App->>API: GET /v1/context/{user_id}
-    API->>Store: get_latest(user_id)
-    Store-->>API: Some(StateSnapshot)
-    API->>Translator: to_prompt_context(&snapshot)
-    Translator-->>API: PromptContext
-    API-->>App: {guidelines, tone, verbosity, flags}
-    App->>LLM: System prompt + PromptContext
+Attuned's behavioral effects are rigorously validated using hypothesis testing with GPT-4o-mini:
+
+| Effect | Result | Effect Size (Cohen's d) |
+|--------|--------|-------------------------|
+| Verbosity control | 4/4 ✓ | d=7.40 (massive) |
+| Warmth/tone | 2/2 ✓ | d=4.11 (massive) |
+| Formality | 2/2 ✓ | d=0.83 (large) |
+| Cognitive load reduction | 2/2 ✓ | d=1.90 (large) |
+| Combined conditions | 2/3 ✓ | d=2.37 (large) |
+| **Total** | **11/13 (85%)** | |
+
+**Key findings:**
+- `verbosity_preference=0.2` → **70% shorter responses** (p<0.0001)
+- `warmth=0.9` → **6x more warm language indicators** (p<0.0001)
+- `cognitive_load=0.9` → **82% fewer multi-step plans** (p<0.0001)
+
+Effect size interpretation: d>0.8 is "large", d>2.0 is "very large"
+
+## What Attuned Produces
+
+When you call `state.prompt()`, you get text like this:
+
 ```
+## Interaction Guidelines
+- Offer suggestions, not actions
+- Drafts require explicit user approval
+- Silence is acceptable if no action is required
+- Use warm, friendly language. Include encouraging phrases like 'Great question!'
+- Keep responses brief and to the point.
+
+Tone: warm-casual
+Verbosity: brief
+```
+
+This is injected into the LLM's system prompt. That's it. No magic. Just validated prompt engineering.
 
 ## Design Goals
 
@@ -105,7 +185,7 @@ sequenceDiagram
 - **No UI:** Library only (optional reference server feature-gated)
 - **No content memory:** Stores state descriptors, not personal content or message history
 
-## Quick Start
+## Quick Start (Rust)
 
 Add Attuned to your `Cargo.toml`:
 
@@ -113,6 +193,7 @@ Add Attuned to your `Cargo.toml`:
 [dependencies]
 attuned-core = "0.1"
 attuned-store = "0.1"
+attuned-infer = "0.1"  # Optional: NLP inference
 tokio = { version = "1", features = ["full"] }
 ```
 
@@ -155,6 +236,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
+### With Inference
+
+```rust
+use attuned_infer::InferenceEngine;
+
+// Create inference engine
+let engine = InferenceEngine::default();
+
+// Infer state from message text
+let state = engine.infer("I'm really worried about this deadline!!!");
+
+// All estimates include source and confidence
+for estimate in state.all() {
+    println!("{}: {:.2} (confidence: {:.2}, source: {})",
+        estimate.axis, estimate.value, estimate.confidence, estimate.source.summary());
+}
+// Output:
+// anxiety_level: 0.72 (confidence: 0.58, source: linguistic(anxiety_score))
+// urgency_sensitivity: 0.81 (confidence: 0.45, source: linguistic(urgency_score))
+```
+
 ### With HTTP Server
 
 ```rust
@@ -165,8 +267,9 @@ use attuned_store::MemoryStore;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let store = MemoryStore::default();
 
-    // Production configuration with security enabled
+    // Enable inference + security
     let config = ServerConfig::default()
+        .with_inference()  // Enables /v1/infer endpoint
         .with_api_keys(["your-secret-key".to_string()])
         .with_rate_limit(1000, 60); // 1000 req/min
 
@@ -186,6 +289,10 @@ graph BT
         HTTP[attuned-http]
     end
 
+    subgraph "Inference Layer"
+        INFER[attuned-infer]
+    end
+
     subgraph "Storage Layer"
         STORE[attuned-store]
         QDRANT[attuned-qdrant]
@@ -197,22 +304,27 @@ graph BT
 
     CLI --> HTTP
     HTTP --> STORE
+    HTTP -.->|optional| INFER
     QDRANT --> STORE
     STORE --> CORE
     HTTP --> CORE
+    INFER --> CORE
 
     style CORE fill:#e1f5fe
     style STORE fill:#fff3e0
     style QDRANT fill:#fff3e0
     style HTTP fill:#f3e5f5
     style CLI fill:#f3e5f5
+    style INFER fill:#e8f5e9
 ```
 
 | Crate | Description | Key Types |
 |-------|-------------|-----------|
+| `attuned-python` | **Python bindings (PyPI: `attuned`)** | `Attuned`, `Presets`, integrations |
 | `attuned-core` | Core types, axes, translators, telemetry | `StateSnapshot`, `PromptContext`, `Translator` |
 | `attuned-store` | Storage abstraction + in-memory backend | `StateStore`, `MemoryStore` |
 | `attuned-qdrant` | Qdrant vector database backend | `QdrantStore`, `QdrantConfig` |
+| `attuned-infer` | NLP inference engine | `InferenceEngine`, `LinguisticExtractor`, `Baseline` |
 | `attuned-http` | Reference HTTP server with security | `Server`, `ServerConfig`, `AuthConfig` |
 | `attuned-cli` | CLI development tool | - |
 
@@ -222,43 +334,53 @@ graph BT
 
 | Method | Path | Description | Auth |
 |--------|------|-------------|------|
-| `POST` | `/v1/state` | Upsert state (patch semantics) | Required |
+| `POST` | `/v1/state` | Upsert state (with optional inference) | Required |
 | `GET` | `/v1/state/{user_id}` | Get latest state | Required |
 | `DELETE` | `/v1/state/{user_id}` | Delete state (GDPR) | Required |
 | `GET` | `/v1/context/{user_id}` | Get translated PromptContext | Required |
 | `POST` | `/v1/translate` | Translate arbitrary state | Required |
+| `POST` | `/v1/infer` | Infer axes from text (no storage) | Required |
 | `GET` | `/health` | Health check | Public |
 | `GET` | `/ready` | Readiness check | Public |
 
-### Request/Response Flow
+### Example: Infer from Message
 
-```mermaid
-flowchart LR
-    subgraph Request
-        REQ[HTTP Request]
-    end
-
-    subgraph Middleware["Middleware Stack"]
-        direction TB
-        SEC[Security Headers]
-        RATE[Rate Limiter]
-        AUTH[API Key Auth]
-        TRACE[Tracing]
-    end
-
-    subgraph Handler
-        VAL[Input Validation]
-        BIZ[Business Logic]
-    end
-
-    subgraph Response
-        RES[HTTP Response]
-    end
-
-    REQ --> SEC --> RATE --> AUTH --> TRACE --> VAL --> BIZ --> RES
+```bash
+curl -X POST http://localhost:8080/v1/infer \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your-api-key" \
+  -d '{
+    "message": "I urgently need help with this!!!",
+    "include_features": true
+  }'
 ```
 
-### Example: Set State
+Response:
+```json
+{
+  "estimates": [
+    {
+      "axis": "anxiety_level",
+      "value": 0.72,
+      "confidence": 0.58,
+      "source": {"type": "linguistic", "features_used": ["anxiety_score"]}
+    },
+    {
+      "axis": "urgency_sensitivity",
+      "value": 0.81,
+      "confidence": 0.45,
+      "source": {"type": "linguistic", "features_used": ["urgency_score"]}
+    }
+  ],
+  "features": {
+    "word_count": 7,
+    "urgency_word_count": 1,
+    "exclamation_ratio": 0.43
+  }
+}
+```
+
+### Example: Set State with Inference
 
 ```bash
 curl -X POST http://localhost:8080/v1/state \
@@ -266,15 +388,14 @@ curl -X POST http://localhost:8080/v1/state \
   -H "Authorization: Bearer your-api-key" \
   -d '{
     "user_id": "u_123",
-    "source": "self_report",
-    "confidence": 1.0,
+    "message": "I am stressed about the deadline",
     "axes": {
-      "warmth": 0.6,
-      "formality": 0.3,
-      "cognitive_load": 0.8
+      "warmth": 0.6
     }
   }'
 ```
+
+Explicit axes (`warmth: 0.6`) override any inferred values. Inference fills in the rest.
 
 ### Example: Get Context
 
@@ -288,61 +409,64 @@ Response:
 {
   "guidelines": [
     "Offer suggestions, not actions",
-    "Drafts require explicit user approval",
-    "Silence is acceptable if no action is required",
-    "Keep responses concise; avoid multi-step plans unless requested"
+    "Acknowledge concerns before providing solutions",
+    "Keep responses concise"
   ],
-  "tone": "warm-casual",
-  "verbosity": "medium",
-  "flags": ["high_cognitive_load"]
+  "tone": "warm and supportive",
+  "verbosity": "concise",
+  "flags": ["needs_reassurance", "high_cognitive_load"]
 }
 ```
 
-## Translation Pipeline
-
-The `RuleTranslator` converts axis values into actionable LLM context:
+## Inference Pipeline
 
 ```mermaid
 flowchart LR
     subgraph Input
-        SS[StateSnapshot<br/>23 axis values]
+        MSG[Message Text]
     end
 
-    subgraph "Translation Rules"
-        direction TB
-        R1[Warmth → Tone]
-        R2[Formality → Tone modifier]
-        R3[Verbosity Pref → Verbosity level]
-        R4[Cognitive Load → Flags]
-        R5[Suggestion Tolerance → Guidelines]
+    subgraph "Feature Extraction"
+        LING[LinguisticExtractor<br/>~100μs]
+    end
+
+    subgraph "Signals"
+        NEG[Negative Emotions<br/>r=0.27]
+        FP[First-Person<br/>r=0.32]
+        HEDGE[Hedges/Uncertainty<br/>r=0.31]
+        URG[Urgency Words]
+    end
+
+    subgraph "State Estimation"
+        BAYES[BayesianUpdater]
+        DELTA[DeltaAnalyzer<br/>Baseline Comparison]
     end
 
     subgraph Output
-        PC[PromptContext]
-        G["guidelines: Vec#lt;String#gt;"]
-        T["tone: String"]
-        V["verbosity: Low / Medium / High"]
-        F["flags: Vec#lt;String#gt;"]
+        STATE[InferredState<br/>23 axes + confidence]
     end
 
-    SS --> R1 & R2 & R3 & R4 & R5
-    R1 & R2 --> T
-    R3 --> V
-    R4 --> F
-    R5 --> G
-    T & V & F & G --> PC
+    MSG --> LING
+    LING --> NEG & FP & HEDGE & URG
+    NEG & FP & HEDGE & URG --> BAYES
+    LING --> DELTA
+    DELTA --> BAYES
+    BAYES --> STATE
 ```
 
-### Threshold Configuration
+### Research Validation
 
-```rust
-let thresholds = Thresholds {
-    high: 0.7,  // Axis value >= 0.7 triggers "high" behavior
-    low: 0.3,   // Axis value <= 0.3 triggers "low" behavior
-};
+Validated against [Dreaddit dataset](https://aclanthology.org/D19-6213/) (3,553 labeled Reddit posts):
 
-let translator = RuleTranslator::new(thresholds);
-```
+| Model | F1 Score | Improvement |
+|-------|----------|-------------|
+| v1 (hedges only) | 0.582 | baseline |
+| v2 (+ negative emotions) | 0.679 | +16.7% |
+
+Key correlations with stress label:
+- Negative emotion words: r=0.27
+- First-person pronouns: r=0.32
+- Uncertainty markers: r=0.31
 
 ## Canonical Axes (23)
 
@@ -390,44 +514,12 @@ mindmap
 | **Emotional** | `emotional_openness`, `emotional_stability`, `anxiety_level`, `need_for_reassurance` | Empathy, reassurance level |
 | **Social** | `warmth`, `formality`, `boundary_strength`, `assertiveness`, `reciprocity_expectation` | Tone, interaction style |
 | **Preferences** | `ritual_need`, `transactional_preference`, `verbosity_preference`, `directness_preference` | Response format, length |
-| **Control** | `autonomy_preference`, `suggestion_tolerance`, `interruption_tolerance`, `reflection_vs_action_bias` | Agency, suggestion frequency |
-| **Safety** | `stakes_awareness`, `privacy_sensitivity` | Caution level, data handling |
+| **Control** | `autonomy_preference`, `suggestion_tolerance`, `interruption_tolerance`, `reflection_vs_action_bias` | Agency, guidance level |
+| **Safety** | `stakes_awareness`, `privacy_sensitivity` | Caution level, sensitivity |
 
 ## Security
 
 Attuned includes comprehensive security features. See [SECURITY.md](SECURITY.md) for full details.
-
-### Security Architecture
-
-```mermaid
-flowchart TB
-    subgraph "External"
-        CLIENT[Client]
-    end
-
-    subgraph "Security Layer"
-        TLS[TLS Termination<br/>via reverse proxy]
-        HEADERS[Security Headers<br/>CSP, X-Frame-Options, etc.]
-        RATE[Rate Limiting<br/>100 req/min default]
-        AUTH[API Key Auth<br/>Bearer tokens]
-    end
-
-    subgraph "Validation Layer"
-        USERID[User ID Validation<br/>max 256 chars, alphanum]
-        AXIS[Axis Validation<br/>0.0 to 1.0 range]
-        BODY[Body Limit<br/>1MB max]
-    end
-
-    subgraph "Data Layer"
-        PII[PII Redaction<br/>in logs/debug]
-        STORE[(Storage)]
-    end
-
-    CLIENT --> TLS --> HEADERS --> RATE --> AUTH
-    AUTH --> USERID --> AXIS --> BODY --> PII --> STORE
-```
-
-### Key Security Features
 
 | Feature | Default | Configuration |
 |---------|---------|---------------|
@@ -437,126 +529,31 @@ flowchart TB
 | API authentication | Disabled | `ServerConfig.with_api_keys()` |
 | Security headers | Enabled | `ServerConfig.security_headers` |
 | PII in logs | Redacted | Automatic |
+| Message storage | **Never** | By design |
 
 ## Performance
 
-Benchmarked on Linux x86_64 (Rust 1.92.0, release mode):
-
-| Operation | Latency | Throughput |
-|-----------|---------|------------|
+| Operation | Latency | Notes |
+|-----------|---------|-------|
+| Linguistic extraction | ~100μs | Pure Rust, no regex |
+| Full inference | <500μs | Including baseline comparison |
 | Axis lookup | 6 ns | 169M ops/sec |
-| Translation (minimal) | 34 ns | 29M ops/sec |
-| Translation (full 23 axes) | 214 ns | 4.7M ops/sec |
-| Snapshot creation (23 axes) | 1.2 µs | 813K ops/sec |
-| JSON roundtrip | 488 ns | 2M ops/sec |
-
-**Key characteristics:**
-- Sub-microsecond core operations
-- Linear scaling with axis count (~50ns per axis)
-- Real-time safe (all ops < 2µs)
-- Zero allocations in hot paths
+| Translation | 214 ns | Full 23 axes |
+| State storage | ~10μs | In-memory |
 
 Run benchmarks:
 ```bash
 cargo bench -p attuned-core
 ```
 
-## Storage Backends
-
-```mermaid
-classDiagram
-    class StateStore {
-        <<trait>>
-        +upsert_latest(snapshot) Result~()~
-        +get_latest(user_id) Result~Option~StateSnapshot~~
-        +delete(user_id) Result~()~
-        +get_history(user_id, limit) Result~Vec~StateSnapshot~~
-    }
-
-    class MemoryStore {
-        -latest: DashMap~String, StateSnapshot~
-        -history: DashMap~String, Vec~StateSnapshot~~
-    }
-
-    class QdrantStore {
-        -client: QdrantClient
-        -collection: String
-    }
-
-    StateStore <|.. MemoryStore
-    StateStore <|.. QdrantStore
-```
-
-### MemoryStore (Default)
-
-Thread-safe, zero-copy in-memory storage using `DashMap`:
-
-```rust
-let store = MemoryStore::default();
-```
-
-### QdrantStore (Persistent)
-
-Vector database backend for production deployments:
-
-```rust
-let config = QdrantConfig {
-    url: "http://localhost:6334".to_string(),
-    collection: "attuned_states".to_string(),
-    ..Default::default()
-};
-let store = QdrantStore::new(config).await?;
-```
-
-## Observability
-
-```mermaid
-flowchart LR
-    subgraph "Attuned"
-        APP[Application]
-        TRACE[Tracing Spans]
-        METRICS[Metrics]
-        HEALTH[Health Checks]
-    end
-
-    subgraph "Collectors"
-        OTEL[OpenTelemetry]
-        PROM[Prometheus]
-    end
-
-    subgraph "Backends"
-        JAEGER[Jaeger]
-        GRAFANA[Grafana]
-    end
-
-    APP --> TRACE --> OTEL --> JAEGER
-    APP --> METRICS --> PROM --> GRAFANA
-    APP --> HEALTH
-```
-
-### Telemetry Setup
-
-```rust
-use attuned_core::{init_tracing, TracingConfig, TracingFormat};
-
-// JSON logging for production
-init_tracing(TracingConfig {
-    format: TracingFormat::Json,
-    level: "info".to_string(),
-    ..Default::default()
-});
-```
-
-### Health Endpoints
-
-- `GET /health` - Aggregated health status with component checks
-- `GET /ready` - Kubernetes-style readiness probe
-
 ## Development
 
 ```bash
 # Build all crates
 cargo build --workspace
+
+# Build with inference
+cargo build --workspace --features inference
 
 # Run tests
 cargo test --workspace
@@ -574,6 +571,23 @@ cargo fmt --all
 cargo clippy --workspace
 ```
 
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Python README](crates/attuned-python/README.md) | Python quick start and integrations |
+| [TECHNICAL.md](TECHNICAL.md) | Quick-reference specification (data contracts, constraints, APIs) |
+| [MANIFESTO.md](MANIFESTO.md) | Philosophical principles and hard constraints |
+| [SECURITY.md](SECURITY.md) | Security policies and responsible disclosure |
+
+Detailed technical documentation is available in [`tasks/reports/`](tasks/reports/):
+
+- [System Architecture](tasks/reports/01-system-architecture.md)
+- [23-Axis Model](tasks/reports/02-axis-model.md)
+- [Inference Engine](tasks/reports/03-inference-engine.md)
+- [HTTP API Reference](tasks/reports/04-http-api-reference.md)
+- [Integration Guide](tasks/reports/05-integration-guide.md)
+
 ## License
 
 Licensed under the Apache License, Version 2.0. See [LICENSE-APACHE](LICENSE-APACHE) for details.
@@ -586,4 +600,3 @@ Contributions are welcome! Before contributing, please read:
 - [SECURITY.md](SECURITY.md) - Security policies and responsible disclosure
 
 Contributors who submit code implicitly agree to uphold the principles in the manifesto. We do not ship features that treat users as targets rather than principals.
-# Attuned

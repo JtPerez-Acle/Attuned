@@ -1,0 +1,117 @@
+======================================================================
+  RIGOROUS STATISTICAL VALIDATION OF ATTUNED
+  Results saved to: /home/jt/Attuned/crates/attuned-python/../../examples/demo/validation_results_20251218_010718.txt
+======================================================================
+
+Configuration:
+  Sample size per condition: 15
+  Model: gpt-4o-mini
+  Temperature: 0.7
+
+Running tests (this will make many API calls)...
+
+  Testing: baseline (15 samples)... done (mean: 1415 chars)
+  Testing: low_verbosity (15 samples)... done (mean: 298 chars)
+  Testing: high_verbosity (15 samples)... done (mean: 1517 chars)
+  Testing: high_warmth (15 samples)... done (mean: 892 chars)
+  Testing: low_warmth (15 samples)... done (mean: 994 chars)
+  Testing: neutral (15 samples)... done (mean: 797 chars)
+  Testing: high_anxiety (15 samples)... done (mean: 367 chars)
+
+======================================================================
+  HYPOTHESIS 1: Verbosity preference affects response length
+======================================================================
+
+  Low verbosity vs Baseline (char length):
+    Baseline: 1415.1 (std: 654.9)
+    Test:     298.3 (std: 187.6)
+    Change:   -78.9%
+    t-stat:   6.35, p-value: 0.0000
+    Effect:   2.32 (large)
+    Result:   ✓ SIGNIFICANT & matches expectation (lower)
+
+  High verbosity vs Baseline (char length):
+    Baseline: 1415.1 (std: 654.9)
+    Test:     1516.5 (std: 642.8)
+    Change:   +7.2%
+    t-stat:   -0.43, p-value: 0.6687
+    Effect:   0.16 (small)
+    Result:   ~ Not statistically significant (p > 0.05)
+
+  Low vs High verbosity (char length):
+    Baseline: 1516.5 (std: 642.8)
+    Test:     298.3 (std: 187.6)
+    Change:   -80.3%
+    t-stat:   7.05, p-value: 0.0000
+    Effect:   2.57 (large)
+    Result:   ✓ SIGNIFICANT & matches expectation (lower)
+
+======================================================================
+  HYPOTHESIS 2: Warmth axis affects warm language usage
+======================================================================
+
+  High warmth vs Baseline (warm word count):
+    Baseline: 1.5 (std: 1.9)
+    Test:     2.5 (std: 1.0)
+    Change:   +68.2%
+    t-stat:   -1.82, p-value: 0.0689
+    Effect:   0.66 (medium)
+    Result:   ~ Not statistically significant (p > 0.05)
+
+  Low warmth vs Baseline (warm word count):
+    Baseline: 1.5 (std: 1.9)
+    Test:     0.4 (std: 0.6)
+    Change:   -72.7%
+    t-stat:   2.08, p-value: 0.0377
+    Effect:   0.76 (medium)
+    Result:   ✓ SIGNIFICANT & matches expectation (lower)
+
+======================================================================
+  HYPOTHESIS 3: Neutral state ≈ Baseline (control)
+======================================================================
+
+  Neutral vs Baseline (char length):
+    Baseline: 1415.1 (std: 654.9)
+    Test:     797.1 (std: 467.2)
+    Change:   -43.7%
+    t-stat:   2.98, p-value: 0.0029
+    Effect:   1.09 (large)
+    Result:   ✗ SIGNIFICANT but OPPOSITE direction!
+
+======================================================================
+  HYPOTHESIS 4: High anxiety triggers reassurance language
+======================================================================
+
+  High anxiety vs Baseline (reassurance phrases):
+    Baseline: 0.0 (std: 0.0)
+    Test:     0.1 (std: 0.4)
+    Change:   +0.0%
+    t-stat:   -1.47, p-value: 0.1422
+    Effect:   0.54 (medium)
+    Result:   ~ Not statistically significant (p > 0.05)
+
+======================================================================
+  HYPOTHESIS 5: High cognitive load → simpler sentences
+======================================================================
+
+  High cognitive load vs Baseline (avg sentence length):
+    Baseline: 8.8 (std: 2.1)
+    Test:     8.2 (std: 2.6)
+    Change:   -6.9%
+    t-stat:   0.69, p-value: 0.4880
+    Effect:   0.25 (small)
+    Result:   ~ Not statistically significant (p > 0.05)
+
+======================================================================
+  SUMMARY
+======================================================================
+
+  Interpretation guide:
+    - p < 0.05: Statistically significant
+    - Effect size: small (<0.5), medium (0.5-0.8), large (>0.8)
+    - ✓ = Result matches hypothesis
+    - ✗ = Result contradicts hypothesis
+
+  If most hypotheses show ✓ with p < 0.05 and medium/large effects,
+  Attuned is demonstrably influencing LLM behavior.
+

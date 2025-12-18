@@ -1,0 +1,25 @@
+[package]
+name = "attuned-infer"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+keywords = ["llm", "inference", "nlp", "state", "context"]
+categories = ["text-processing", "science"]
+description = "Fast, transparent inference of human state axes from natural language"
+
+[dependencies]
+attuned-core = { workspace = true }
+serde = { workspace = true }
+chrono = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+proptest = { workspace = true }
+
+[[bench]]
+name = "inference"
+harness = false

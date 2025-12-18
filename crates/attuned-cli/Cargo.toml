@@ -16,6 +16,7 @@ path = "src/main.rs"
 [dependencies]
 attuned-core = { workspace = true }
 attuned-store = { workspace = true }
+attuned-http = { workspace = true }
 clap = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }

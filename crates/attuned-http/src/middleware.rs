@@ -36,10 +36,7 @@ pub async fn security_headers(request: Request, next: Next) -> Response {
     );
 
     // Prevent clickjacking
-    headers.insert(
-        header::X_FRAME_OPTIONS,
-        HeaderValue::from_static("DENY"),
-    );
+    headers.insert(header::X_FRAME_OPTIONS, HeaderValue::from_static("DENY"));
 
     // Legacy XSS protection (still useful for older browsers)
     headers.insert(
@@ -97,7 +94,10 @@ impl Default for AuthConfig {
             api_keys: HashSet::new(),
             header_name: "Authorization".to_string(),
             prefix: "Bearer ".to_string(),
-            public_paths: ["/health", "/ready"].iter().map(|s| s.to_string()).collect(),
+            public_paths: ["/health", "/ready"]
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
         }
     }
 }
@@ -165,9 +165,7 @@ pub async fn api_key_auth(
         .and_then(|v| v.to_str().ok());
 
     let api_key = match auth_header {
-        Some(value) if value.starts_with(&auth.config.prefix) => {
-            &value[auth.config.prefix.len()..]
-        }
+        Some(value) if value.starts_with(&auth.config.prefix) => &value[auth.config.prefix.len()..],
         Some(_) => {
             return Err((
                 StatusCode::UNAUTHORIZED,
@@ -292,7 +290,10 @@ impl RateLimitState {
             let retry_after = self.config.window - now.duration_since(entry.window_start);
             Err((entry.count, retry_after))
         } else {
-            Ok((self.config.max_requests - entry.count, self.config.max_requests))
+            Ok((
+                self.config.max_requests - entry.count,
+                self.config.max_requests,
+            ))
         }
     }
 }

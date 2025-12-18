@@ -1,5 +1,7 @@
 //! Attuned CLI tool for development and testing.
 
+use attuned_http::{Server, ServerConfig};
+use attuned_store::MemoryStore;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -109,8 +111,26 @@ async fn main() -> anyhow::Result<()> {
             }
         }
         Commands::Serve { port } => {
-            println!("Starting server on port {}...", port);
-            // TODO: Implement (TASK-007)
+            let bind_addr = format!("127.0.0.1:{}", port).parse()?;
+            let config = ServerConfig {
+                bind_addr,
+                ..Default::default()
+            };
+
+            let store = MemoryStore::default();
+            let server = Server::new(store, config);
+
+            println!("Starting Attuned server on http://127.0.0.1:{}", port);
+            println!("Endpoints:");
+            println!("  POST   /v1/state          - Upsert state");
+            println!("  GET    /v1/state/{{user}}   - Get state");
+            println!("  GET    /v1/context/{{user}} - Get translated context");
+            println!("  DELETE /v1/state/{{user}}   - Delete state");
+            println!("  GET    /health            - Health check");
+            println!();
+            println!("Press Ctrl+C to stop");
+
+            server.run().await?;
         }
         Commands::Health => {
             if let Some(server) = cli.server {

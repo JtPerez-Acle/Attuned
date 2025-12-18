@@ -7,12 +7,19 @@
 //!
 //! ## Endpoints
 //!
-//! - `POST /v1/state` - Upsert state (patch semantics)
+//! - `POST /v1/state` - Upsert state (patch semantics, optionally with inference)
 //! - `GET /v1/state/{user_id}` - Get latest state
 //! - `GET /v1/context/{user_id}` - Get PromptContext
 //! - `DELETE /v1/state/{user_id}` - Delete state
+//! - `POST /v1/infer` - Infer axes from message text (requires "inference" feature)
 //! - `GET /health` - Health check
 //! - `GET /metrics` - Prometheus metrics
+//!
+//! ## Features
+//!
+//! - `inference` - Enable automatic inference from message text. Adds the `/v1/infer`
+//!   endpoint and allows the `/v1/state` endpoint to accept a `message` field for
+//!   automatic axis inference.
 //!
 //! ## Example
 //!
@@ -30,10 +37,25 @@
 //!     Ok(())
 //! }
 //! ```
+//!
+//! ## With Inference
+//!
+//! ```rust,ignore
+//! use attuned_http::{Server, ServerConfig};
+//! use attuned_store::MemoryStore;
+//!
+//! #[tokio::main]
+//! async fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     let store = MemoryStore::default();
+//!     let config = ServerConfig::default().with_inference();
+//!
+//!     let server = Server::new(store, config);
+//!     server.run().await?;
+//!     Ok(())
+//! }
+//! ```
 
 #![deny(missing_docs)]
-
-// TODO: Implement HTTP server (TASK-006)
 
 mod config;
 mod error;
@@ -46,3 +68,7 @@ pub use error::HttpError;
 pub use handlers::AppState;
 pub use middleware::{AuthConfig, RateLimitConfig, RateLimitKey};
 pub use server::Server;
+
+// Re-export inference types when feature is enabled
+#[cfg(feature = "inference")]
+pub use handlers::{InferEstimate, InferRequest, InferResponse, InferSourceResponse};

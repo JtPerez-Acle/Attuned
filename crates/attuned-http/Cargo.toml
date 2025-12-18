@@ -31,3 +31,12 @@ tokio = { workspace = true }
 
 [features]
 default = []
+inference = ["dep:attuned-infer", "dep:dashmap"]
+
+[dependencies.attuned-infer]
+workspace = true
+optional = true
+
+[dependencies.dashmap]
+workspace = true
+optional = true

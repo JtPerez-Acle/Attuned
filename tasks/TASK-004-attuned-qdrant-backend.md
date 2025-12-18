@@ -1,17 +1,19 @@
 # TASK-004: attuned-qdrant - Qdrant Storage Backend
 
 ## Status
-- [ ] Not Started
+- [x] Not Started (Post-v1.0)
 - [ ] In Progress
 - [ ] Completed
 - [ ] Blocked
 
-**Priority**: Medium
+**Priority**: Low (Post-v1.0 Enhancement)
 **Created**: 2025-12-16
-**Last Updated**: 2025-12-16
-**Phase**: 3 - Backends & Integrations
-**Depends On**: TASK-002, TASK-003
+**Last Updated**: 2025-12-18
+**Phase**: 7 - Post-v1.0 Enhancements
+**Depends On**: TASK-002, TASK-003 (completed)
 **Blocks**: None (optional backend)
+
+> **Note**: Stubs exist. MemoryStore is sufficient for v1.0.0. This task is deferred to post-release for production distributed deployments.
 
 ## Task Description
 Implement a Qdrant-backed StateStore for persistent, distributed state storage. Qdrant is used as a **snapshot store**, not for semantic search. This enables production deployments with state durability across restarts.
