@@ -4,13 +4,14 @@
 - [ ] Not Started
 - [ ] In Progress
 - [ ] Completed
-- [ ] Blocked
+- [x] Blocked (waiting on TASK-014, TASK-018)
 
 **Priority**: High
 **Created**: 2025-12-16
-**Last Updated**: 2025-12-16
+**Last Updated**: 2025-12-18
 **Phase**: 6 - DevOps & Release
-**Depends On**: TASK-001 through TASK-010
+**Depends On**: TASK-001 through TASK-013 (completed), **TASK-014 (Python bindings)**, TASK-018 (Demo)
+**Blocks**: PyPI publication, crates.io publication
 
 ## Task Description
 Prepare and execute the first production release of Attuned. This includes final polish, version bumping, changelog generation, and publishing.
@@ -96,11 +97,22 @@ git push origin v1.0.0
 Due to dependencies, crates must be published in this order:
 1. `attuned-core` (no internal deps)
 2. `attuned-store` (depends on core)
-3. `attuned-qdrant` (depends on core, store)
-4. `attuned-http` (depends on core, store)
-5. `attuned-cli` (depends on all)
+3. `attuned-infer` (depends on core)
+4. `attuned-qdrant` (depends on core, store) - optional
+5. `attuned-http` (depends on core, store, infer)
+6. `attuned-cli` (depends on all) - optional
+7. `attuned-python` → **PyPI as `attuned`** (depends on core, infer)
 
 Wait 30-60 seconds between publishes for crates.io indexing.
+
+## PyPI Publishing
+
+After crates.io:
+```bash
+cd crates/attuned-python
+maturin build --release
+maturin publish  # Publishes to PyPI as 'attuned'
+```
 
 ## Version Strategy
 

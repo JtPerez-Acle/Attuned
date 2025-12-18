@@ -2,6 +2,43 @@
 
 Quick-reference specification for Attuned developers. For detailed documentation, see [`tasks/reports/`](tasks/reports/).
 
+## Python API (Recommended)
+
+```python
+from attuned import Attuned
+
+# Simple API - set any axes, rest default to neutral (0.5)
+state = Attuned(
+    verbosity_preference=0.2,  # Brief
+    warmth=0.9,                # Warm
+    cognitive_load=0.8,        # User is overwhelmed
+)
+
+# Get prompt context string - works with ANY LLM
+system_prompt = f"You are an assistant.\n\n{state.prompt()}"
+
+# Presets for common patterns
+state = Attuned.presets.anxious_user()     # Warm, reassuring
+state = Attuned.presets.busy_executive()   # Brief, formal
+state = Attuned.presets.learning_student() # Detailed, patient
+
+# Integrations (thin wrappers)
+from attuned.integrations.openai import AttunedOpenAI
+from attuned.integrations.anthropic import AttunedAnthropic
+from attuned.integrations.litellm import AttunedLiteLLM  # 100+ providers
+```
+
+### Python Types
+
+| Type | Description |
+|------|-------------|
+| `Attuned` | Main class - set axes, get prompt context |
+| `Attuned.presets` | Pre-configured states (anxious_user, busy_executive, etc.) |
+| `StateSnapshot` | Low-level state container (advanced) |
+| `RuleTranslator` | Converts state to prompt context (advanced) |
+| `PromptContext` | Structured output with guidelines, tone, verbosity |
+| `AttunedClient` | HTTP client for distributed deployments |
+
 ## Data Contracts
 
 ### StateSnapshot
@@ -48,7 +85,7 @@ All axes are normalized to `[0.0, 1.0]`.
 | | `decision_fatigue` | Capacity for choices |
 | | `tolerance_for_complexity` | Preference for detail |
 | | `urgency_sensitivity` | Response to time pressure |
-| **Emotional** | `emotional_intensity` | Current affect strength |
+| **Emotional** | `emotional_openness` | Willingness to share feelings |
 | | `emotional_stability` | Affect regulation capacity |
 | | `anxiety_level` | Worry/concern state |
 | | `need_for_reassurance` | Desire for validation |
@@ -58,15 +95,15 @@ All axes are normalized to `[0.0, 1.0]`.
 | | `assertiveness` | Directness in expression |
 | | `reciprocity_expectation` | Expected mutual engagement |
 | **Preferences** | `ritual_need` | Preference for routine |
-| | `directness_preference` | Direct vs indirect |
+| | `transactional_preference` | Task-focused vs relational |
 | | `verbosity_preference` | Response length |
-| | `structure_preference` | Organized vs freeform |
-| **Control** | `autonomy_need` | Self-direction need |
-| | `information_need` | Detail requirement |
-| | `predictability_need` | Surprise tolerance |
-| | `control_need` | Influence over process |
-| **Safety** | `vulnerability_state` | Current fragility |
-| | `trust_level` | Openness to system |
+| | `directness_preference` | Direct vs indirect |
+| **Control** | `autonomy_preference` | Self-direction preference |
+| | `suggestion_tolerance` | Openness to suggestions |
+| | `interruption_tolerance` | Tolerance for interruptions |
+| | `reflection_vs_action_bias` | Thinking vs doing preference |
+| **Safety** | `stakes_awareness` | Importance of current context |
+| | `privacy_sensitivity` | Data sharing comfort |
 
 ## Inference Constraints
 
@@ -188,6 +225,20 @@ f(words) = 0.5                           if words < 10
 | Flag | Crate | Effect |
 |------|-------|--------|
 | `inference` | `attuned-http` | Enables `/v1/infer`, adds `attuned-infer` + `dashmap` |
+
+## Behavioral Validation (LLM Effects)
+
+Tested with GPT-4o-mini, n=20 per condition, Welch's t-test:
+
+| Axis | Effect | p-value | Cohen's d |
+|------|--------|---------|-----------|
+| `verbosity_preference=0.2` | -70% response length | <0.0001 | 7.40 |
+| `verbosity_preference=0.9` | +31% response length | 0.0002 | 1.16 |
+| `warmth=0.9` | 6.1 warm indicators/response | <0.0001 | 4.11 |
+| `formality=0.9` | Formal language detected | 0.0086 | 0.83 |
+| `cognitive_load=0.9` | -82% multi-step plans | <0.0001 | 1.90 |
+
+**Total: 11/13 tests passed (85%)**
 
 ## Research References
 

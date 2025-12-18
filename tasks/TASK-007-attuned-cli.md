@@ -1,17 +1,19 @@
 # TASK-007: attuned-cli - Developer CLI Tool
 
 ## Status
-- [ ] Not Started
+- [x] Partial (basic `serve` command works)
 - [ ] In Progress
 - [ ] Completed
 - [ ] Blocked
 
-**Priority**: Low
+**Priority**: Low (Post-v1.0 Enhancement)
 **Created**: 2025-12-16
-**Last Updated**: 2025-12-16
-**Phase**: 3 - Backends & Integrations
-**Depends On**: TASK-002, TASK-003
+**Last Updated**: 2025-12-18
+**Phase**: 7 - Post-v1.0 Enhancements
+**Depends On**: TASK-002, TASK-003 (completed)
 **Blocks**: None (optional tooling)
+
+> **Note**: Basic structure exists with `attuned serve` working. Full CLI polish is deferred to post-v1.0. Python bindings are the primary user interface for v1.0.
 
 ## Task Description
 Build a CLI tool for developers to interact with Attuned during development and testing. Useful for debugging, manual state management, and integration testing.

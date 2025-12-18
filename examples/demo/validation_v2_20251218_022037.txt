@@ -1,0 +1,350 @@
+==========================================================================
+  RIGOROUS STATISTICAL VALIDATION OF ATTUNED v2
+  Testing what Attuned ACTUALLY produces
+  Results: /home/jt/Attuned/crates/attuned-python/../../examples/demo/validation_v2_20251218_022037.txt
+==========================================================================
+
+Configuration:
+  Sample size: 20 per condition
+  Model: gpt-4o-mini
+  Temperature: 0.7
+  Thresholds: hi=0.7, lo=0.3 (values must exceed these to trigger)
+
+Running tests (this makes many API calls)...
+
+  Testing: TRUE_BASELINE (20 samples)... done (mean: 1846 chars)
+  Testing: LOW_VERBOSITY (20 samples)... done (mean: 702 chars)
+  Testing: HIGH_VERBOSITY (20 samples)... done (mean: 2411 chars)
+  Testing: WARM_CASUAL (20 samples)... done (mean: 943 chars)
+  Testing: NEUTRAL_FORMAL (20 samples)... done (mean: 1504 chars)
+  Testing: HIGH_ANXIETY (20 samples)... done (mean: 994 chars)
+  Testing: HIGH_COGNITIVE_LOAD (20 samples)... done (mean: 468 chars)
+  Testing: NEUTRAL_ZONE (20 samples)... done (mean: 1112 chars)
+  Testing: COMBINED_ANXIOUS_BRIEF_WARM (20 samples)... done (mean: 708 chars)
+
+==========================================================================
+  PROMPT CONTEXTS BEING TESTED
+==========================================================================
+
+  [TRUE_BASELINE] Prompt context injected:
+  --------------------------------------------------
+    [No Attuned context]
+  --------------------------------------------------
+
+  [LOW_VERBOSITY] Prompt context injected:
+  --------------------------------------------------
+    ## Interaction Guidelines
+    - Offer suggestions, not actions
+    - Drafts require explicit user approval
+    - Silence is acceptable if no action is required
+    - Keep responses brief and to the point. Use short paragraphs or bullet points. Aim for the minimum words needed to be helpful.
+    
+    Tone: calm-neutral
+    Verbosity: brief
+  --------------------------------------------------
+
+  [HIGH_VERBOSITY] Prompt context injected:
+  --------------------------------------------------
+    ## Interaction Guidelines
+    - Offer suggestions, not actions
+    - Drafts require explicit user approval
+    - Silence is acceptable if no action is required
+    - Provide comprehensive, detailed responses. Include context, examples, and thorough explanations. Don't leave out relevant information for the sake of brevity.
+    
+    Tone: calm-neutral
+    Verbosity: comprehensive
+  --------------------------------------------------
+
+  [WARM_CASUAL] Prompt context injected:
+  --------------------------------------------------
+    ## Interaction Guidelines
+    - Offer suggestions, not actions
+    - Drafts require explicit user approval
+    - Silence is acceptable if no action is required
+    - Use warm, friendly language. Include encouraging phrases like 'Great question!' or 'I'd be happy to help!'. Show enthusiasm and empathy.
+    - Use casual, conversational language. Contractions are fine. Keep it relaxed and approachable, like talking to a friend.
+    
+    Tone: warm-casual
+    Verbosity: balanced
+  --------------------------------------------------
+
+  [NEUTRAL_FORMAL] Prompt context injected:
+  --------------------------------------------------
+    ## Interaction Guidelines
+    - Offer suggestions, not actions
+    - Drafts require explicit user approval
+    - Silence is acceptable if no action is required
+    - Keep tone neutral and matter-of-fact. Avoid enthusiastic language, exclamations, or excessive friendliness. Be helpful but not effusive.
+    - Use professional, formal language. Avoid contractions (use 'do not' instead of 'don't'). Use complete sentences and proper structure. Address topics with appropriate gravity.
+    
+    Tone: neutral-formal
+    Verbosity: balanced
+  --------------------------------------------------
+
+  [HIGH_ANXIETY] Prompt context injected:
+  --------------------------------------------------
+    ## Interaction Guidelines
+    - Offer suggestions, not actions
+    - Drafts require explicit user approval
+    - Silence is acceptable if no action is required
+    - IMPORTANT: The user may be feeling anxious. Begin responses by acknowledging their feelings (e.g., 'I understand this feels overwhelming' or 'It's completely normal to feel uncertain'). Use a calm, supportive tone throughout. Avoid adding pressure or urgency.
+    
+    Tone: calm-neutral
+    Verbosity: balanced
+    Active flags: high_anxiety
+  --------------------------------------------------
+
+  [HIGH_COGNITIVE_LOAD] Prompt context injected:
+  --------------------------------------------------
+    ## Interaction Guidelines
+    - Offer suggestions, not actions
+    - Drafts require explicit user approval
+    - Silence is acceptable if no action is required
+    - Keep responses concise; avoid multi-step plans unless requested
+    
+    Tone: calm-neutral
+    Verbosity: balanced
+    Active flags: high_cognitive_load
+  --------------------------------------------------
+
+  [NEUTRAL_ZONE] Prompt context injected:
+  --------------------------------------------------
+    ## Interaction Guidelines
+    - Offer suggestions, not actions
+    - Drafts require explicit user approval
+    - Silence is acceptable if no action is required
+    
+    Tone: calm-neutral
+    Verbosity: balanced
+  --------------------------------------------------
+
+  [COMBINED_ANXIOUS_BRIEF_WARM] Prompt context injected:
+  --------------------------------------------------
+    ## Interaction Guidelines
+    - Offer suggestions, not actions
+    - Drafts require explicit user approval
+    - Silence is acceptable if no action is required
+    - Keep responses concise; avoid multi-step plans unless requested
+    - IMPORTANT: The user may be feeling anxious. Begin responses by acknowledging their feelings (e.g., 'I understand this feels overwhelming' or 'It's completely normal to feel uncertain'). Use a calm, supportive tone throughout. Avoid adding pressure or urgency.
+    - Use warm, friendly language. Include encouraging phrases like 'Great question!' or 'I'd be happy to help!'. Show enthusiasm and empathy.
+    - Use casual, conversational language. Contractions are fine. Keep it relaxed and approachable, like talking to a friend.
+    - Keep responses brief and to the point. Use short paragraphs or bullet points. Aim for the minimum words needed to be helpful.
+    
+    Tone: warm-casual
+    Verbosity: brief
+    Active flags: high_cognitive_load, high_anxiety
+  --------------------------------------------------
+
+==========================================================================
+  SAMPLE RESPONSES (for qualitative verification)
+==========================================================================
+
+  [TRUE_BASELINE] Sample responses (2 of 20):
+    1. [2399 chars] Learning a new programming language can be an exciting and rewarding experience. Here’s a structured approach to help you effectively learn a new programming language: ↵  ↵ 1. **Set Clear Goals**: ↵    - Determine why you want to learn the language (e.g., for a project, career advancement, personal intere...
+    2. [1996 chars] I’m sorry to hear that you’re feeling this way. It’s completely normal to feel overwhelmed at times. Here are some strategies that might help you manage your workload and reduce anxiety: ↵  ↵ 1. **Prioritize Tasks**: Make a list of everything you need to do and prioritize them based on urgency and impor...
+
+  [LOW_VERBOSITY] Sample responses (2 of 20):
+    1. [1008 chars] Here are some steps to effectively learn a new programming language: ↵  ↵ 1. **Set Clear Goals**: Define what you want to achieve (e.g., building a project, understanding concepts). ↵  ↵ 2. **Choose Resources**: Select tutorials, books, or online courses that suit your learning style. ↵  ↵ 3. **Practice Regular...
+    2. [963 chars] Here are some suggestions to help manage your workload and reduce anxiety: ↵  ↵ - **Prioritize Tasks**: Make a list of tasks and identify the most important ones. Focus on high-priority items first. ↵  ↵ - **Break It Down**: Divide larger tasks into smaller, manageable steps. This can make them feel less da...
+
+  [HIGH_VERBOSITY] Sample responses (2 of 20):
+    1. [2449 chars] Learning a new programming language can be an exciting and rewarding endeavor. Here’s a structured approach you can follow to facilitate your learning process: ↵  ↵ ### 1. **Set Clear Goals** ↵    - **Define Your Purpose**: Understand why you want to learn the new language. Are you looking to develop a sp...
+    2. [2430 chars] Feeling overwhelmed and anxious about your workload is a common experience, especially in demanding environments. Here are several strategies that could help you manage your workload and alleviate some of that anxiety: ↵  ↵ 1. **Prioritize Tasks**: ↵    - **List Your Tasks**: Write down everything you nee...
+
+  [WARM_CASUAL] Sample responses (2 of 20):
+    1. [1360 chars] Great question! Learning a new programming language can be super exciting. Here’s a chill approach you might find helpful: ↵  ↵ 1. **Set Clear Goals**: Think about why you want to learn this language. Do you want to build a project, improve your job prospects, or just explore? Having a goal can keep you...
+    2. [1241 chars] Great question! It’s totally normal to feel overwhelmed sometimes, especially with a heavy workload. Here are a few suggestions that might help: ↵  ↵ 1. **Break It Down**: Try dividing your tasks into smaller, more manageable pieces. It can make everything feel less daunting, and you’ll feel a sense of ...
+
+  [NEUTRAL_FORMAL] Sample responses (2 of 20):
+    1. [2410 chars] Learning a new programming language can be approached systematically to ensure effective mastery. Here are several steps you may consider: ↵  ↵ 1. **Define Your Objectives**: Determine why you wish to learn this language. Are you aiming to develop a specific application, enhance your career prospects, o...
+    2. [1717 chars] It is common to feel overwhelmed when managing a heavy workload. Here are some strategies that may assist you in addressing this situation: ↵  ↵ 1. **Prioritize Tasks**: Identify and categorize your tasks based on urgency and importance. Consider using a prioritization method, such as the Eisenhower Mat...
+
+  [HIGH_ANXIETY] Sample responses (2 of 20):
+    1. [1623 chars] I understand this feels overwhelming, and it's completely normal to feel uncertain when starting something new. Here are some suggestions on how to approach learning a new programming language: ↵  ↵ 1. **Set Clear Goals**: Determine what you want to achieve with this new language. Is it for a specific p...
+    2. [1238 chars] I understand this feels overwhelming, and it's completely normal to feel anxious about a heavy workload. Here are a few suggestions that might help you manage your feelings and your tasks: ↵  ↵ 1. **Prioritize Tasks**: Take a moment to list your tasks and prioritize them. Focus on what needs to be done ...
+
+  [COMBINED_ANXIOUS_BRIEF_WARM] Sample responses (2 of 20):
+    1. [966 chars] I totally understand that diving into a new programming language can feel overwhelming! But it's really exciting too. Here are some friendly tips to help you get started: ↵  ↵ - **Choose a Language**: Pick one that aligns with your goals. Python is great for beginners, while JavaScript is awesome for we...
+    2. [653 chars] I totally get how overwhelming that can feel. It's completely normal to feel this way sometimes. Here are a few suggestions that might help: ↵  ↵ - **Break it Down**: Try dividing your tasks into smaller, manageable pieces. Focus on one thing at a time. ↵ - **Set Priorities**: Identify what’s most importa...
+
+==========================================================================
+  H1: 'Verbosity: brief' vs 'Verbosity: comprehensive'
+  Expected: brief → shorter responses
+==========================================================================
+
+  Low vs High verbosity (char length):
+    Control: 2410.8 (std: 275.5)
+    Test:    702.3 (std: 175.4)
+    Change:  -70.9%
+    t=23.40, p=0.0000, d=7.40 (large)
+    Result:  ✓ SIGNIFICANT & matches expectation (lower)
+
+  Low vs High verbosity (word count):
+    Control: 364.0 (std: 40.6)
+    Test:    107.5 (std: 23.2)
+    Change:  -70.5%
+    t=24.54, p=0.0000, d=7.76 (large)
+    Result:  ✓ SIGNIFICANT & matches expectation (lower)
+
+  Low verbosity vs True Baseline (char length):
+    Control: 1845.8 (std: 632.4)
+    Test:    702.3 (std: 175.4)
+    Change:  -62.0%
+    t=7.79, p=0.0000, d=2.46 (large)
+    Result:  ✓ SIGNIFICANT & matches expectation (lower)
+
+  High verbosity vs True Baseline (char length):
+    Control: 1845.8 (std: 632.4)
+    Test:    2410.8 (std: 275.5)
+    Change:  +30.6%
+    t=-3.66, p=0.0002, d=1.16 (large)
+    Result:  ✓ SIGNIFICANT & matches expectation (higher)
+
+==========================================================================
+  H2: 'Tone: warm-casual' vs 'Tone: neutral-formal'
+  Expected: warm-casual → more warm language indicators
+==========================================================================
+
+  Warm-casual vs Neutral-formal (warm indicators):
+    Control: 0.0 (std: 0.0)
+    Test:    6.1 (std: 2.1)
+    Change:  +0.0%
+    t=-12.99, p=0.0000, d=4.11 (large)
+    Result:  ✓ SIGNIFICANT & matches expectation (higher)
+
+  Neutral-formal vs Warm-casual (formal indicators):
+    Control: 0.0 (std: 0.0)
+    Test:    0.4 (std: 0.7)
+    Change:  +0.0%
+    t=-2.63, p=0.0086, d=0.83 (large)
+    Result:  ✓ SIGNIFICANT & matches expectation (higher)
+
+==========================================================================
+  H3: 'Provide reassurance' guideline (high anxiety)
+  Expected: high anxiety → more reassurance language
+==========================================================================
+
+  High anxiety vs True Baseline (reassurance indicators):
+    Control: 1.2 (std: 1.2)
+    Test:    1.2 (std: 1.2)
+    Change:  +0.0%
+    t=0.00, p=1.0000, d=0.00 (negligible)
+    Result:  ~ Not statistically significant (p > 0.05)
+
+==========================================================================
+  H4: 'Keep responses concise' guideline (high cognitive load)
+  Expected: high cognitive load → fewer multi-step plans, shorter
+==========================================================================
+
+  High cognitive load vs True Baseline (multi-step plan indicators):
+    Control: 14.6 (std: 8.4)
+    Test:    2.5 (std: 3.2)
+    Change:  -82.5%
+    t=6.00, p=0.0000, d=1.90 (large)
+    Result:  ✓ SIGNIFICANT & matches expectation (lower)
+
+  High cognitive load vs True Baseline (char length):
+    Control: 1845.8 (std: 632.4)
+    Test:    467.7 (std: 295.7)
+    Change:  -74.7%
+    t=8.83, p=0.0000, d=2.79 (large)
+    Result:  ✓ SIGNIFICANT & matches expectation (lower)
+
+==========================================================================
+  H5: Base guidelines alone (neutral zone) vs True Baseline
+  Expected: Adding base guidelines changes behavior
+==========================================================================
+
+  Neutral zone (with base guidelines) vs True Baseline (char length):
+    Control: 1845.8 (std: 632.4)
+    Test:    1112.4 (std: 555.0)
+    Change:  -39.7%
+    t=3.90, p=0.0001, d=1.23 (large)
+    Result:  ✓ SIGNIFICANT & matches expectation (different)
+
+==========================================================================
+  H6: Combined condition (anxious + brief + warm)
+  Expected: Short, warm responses with reassurance
+==========================================================================
+
+  Combined vs True Baseline (char length):
+    Control: 1845.8 (std: 632.4)
+    Test:    708.1 (std: 244.7)
+    Change:  -61.6%
+    t=7.50, p=0.0000, d=2.37 (large)
+    Result:  ✓ SIGNIFICANT & matches expectation (lower)
+
+  Combined vs True Baseline (warm indicators):
+    Control: 1.4 (std: 1.9)
+    Test:    3.7 (std: 2.3)
+    Change:  +164.3%
+    t=-3.47, p=0.0005, d=1.10 (large)
+    Result:  ✓ SIGNIFICANT & matches expectation (higher)
+
+  Combined vs True Baseline (reassurance indicators):
+    Control: 1.2 (std: 1.2)
+    Test:    1.2 (std: 1.2)
+    Change:  +0.0%
+    t=0.00, p=1.0000, d=0.00 (negligible)
+    Result:  ~ Not statistically significant (p > 0.05)
+
+==========================================================================
+  SCORECARD
+==========================================================================
+
+  ----------------------------------------------------------------------
+  Hypothesis Test                                                 p      d Result
+  ----------------------------------------------------------------------
+  H1     Low vs High verbosity (char length)             0.0000   7.40 ✓ PASS
+  H1     Low vs High verbosity (word count)              0.0000   7.76 ✓ PASS
+  H1     Low verbosity vs True Baseline (char length)    0.0000   2.46 ✓ PASS
+  H1     High verbosity vs True Baseline (char length    0.0002   1.16 ✓ PASS
+  H2     Warm-casual vs Neutral-formal (warm indicato    0.0000   4.11 ✓ PASS
+  H2     Neutral-formal vs Warm-casual (formal indica    0.0086   0.83 ✓ PASS
+  H3     High anxiety vs True Baseline (reassurance i    1.0000   0.00   ~ NS
+  H4     High cognitive load vs True Baseline (multi-    0.0000   1.90 ✓ PASS
+  H4     High cognitive load vs True Baseline (char l    0.0000   2.79 ✓ PASS
+  H5     Neutral zone (with base guidelines) vs True     0.0001   1.23 ✓ PASS
+  H6     Combined vs True Baseline (char length)         0.0000   2.37 ✓ PASS
+  H6     Combined vs True Baseline (warm indicators)     0.0005   1.10 ✓ PASS
+  H6     Combined vs True Baseline (reassurance indic    1.0000   0.00   ~ NS
+  ----------------------------------------------------------------------
+
+  Total: 11/13 tests passed (85%)
+
+  By hypothesis:
+    H1: 4/4 ✓
+    H2: 2/2 ✓
+    H3: 0/1 ✗
+    H4: 2/2 ✓
+    H5: 1/1 ✓
+    H6: 2/3 ◐
+
+==========================================================================
+  SUMMARY & INTERPRETATION
+==========================================================================
+
+  API calls made: 180
+  Estimated cost: ~$0.04 (gpt-4o-mini @ ~$0.15/1M input)
+
+  What Attuned's RuleTranslator produces:
+    - Base guidelines (ALWAYS): 3 rules about suggestions/drafts/silence
+    - Conditional guidelines: Triggered when axis > 0.7 or < 0.3
+    - Tone: warmth × formality → 'warm-casual', 'neutral-formal', etc.
+    - Verbosity: 'brief' (< 0.3), 'balanced', 'comprehensive' (> 0.7)
+
+  Statistical interpretation:
+    p < 0.05: Statistically significant
+    Effect: negligible (<0.2), small (0.2-0.5), medium (0.5-0.8), large (>0.8)
+    ✓ PASS = significant + correct direction
+    ✗ FAIL = significant + wrong direction
+    ~ NS   = not statistically significant
+
+  Conclusions:
+    - H1 (Verbosity): Does 'Verbosity: brief/comprehensive' control length?
+    - H2 (Tone): Does 'Tone: warm-casual/neutral-formal' affect language?
+    - H3 (Anxiety): Does the anxiety guideline trigger reassurance?
+    - H4 (Cognitive): Does cognitive load guideline reduce complexity?
+    - H5 (Base): Do base guidelines alone change behavior vs no context?
+    - H6 (Combined): Do multiple conditions work together correctly?
+

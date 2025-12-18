@@ -1,11 +1,68 @@
 # Attuned
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE-APACHE)
+[![PyPI](https://img.shields.io/badge/pypi-attuned-blue.svg)](https://pypi.org/project/attuned/)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org)
-[![Security](https://img.shields.io/badge/security-audited-green.svg)](SECURITY.md)
+[![Validated](https://img.shields.io/badge/validated-85%25-brightgreen.svg)](#statistical-validation)
 [![Manifesto](https://img.shields.io/badge/manifesto-read-purple.svg)](MANIFESTO.md)
 
-**Attuned** is a minimal, Rust-first framework for representing human state as interpretable vectors and translating that state into machine-consumable interaction constraints for LLM/agent systems.
+**Declare human state. Get appropriate AI behavior.**
+
+Attuned is the behavioral layer for LLM applications. Set user context, get conditioned responses. Works with any LLM.
+
+```bash
+pip install attuned
+```
+
+## Quick Start (Python)
+
+```python
+from attuned import Attuned
+
+# Declare user state - set what you need, rest defaults to neutral
+state = Attuned(
+    verbosity_preference=0.2,  # Brief responses
+    warmth=0.9,                # Warm and friendly
+)
+
+# Get prompt context - works with ANY LLM
+system_prompt = f"You are an assistant.\n\n{state.prompt()}"
+
+# Use with OpenAI, Anthropic, Ollama, or any LLM
+response = openai.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": "How do I learn Python?"}
+    ]
+)
+```
+
+### With Presets
+
+```python
+from attuned import Attuned
+
+state = Attuned.presets.anxious_user()    # Warm, reassuring, not overwhelming
+state = Attuned.presets.busy_executive()  # Brief, formal, direct
+state = Attuned.presets.learning_student() # Detailed, patient, educational
+```
+
+### With Integrations
+
+```python
+from attuned import Attuned
+from attuned.integrations.openai import AttunedOpenAI
+
+client = AttunedOpenAI(state=Attuned(verbosity_preference=0.2))
+response = client.chat("How do I learn Python?")
+```
+
+---
+
+## What is Attuned?
+
+Attuned is a Rust-first framework for representing human state as interpretable vectors (23 axes) and translating that state into machine-consumable interaction constraints.
 
 This is **not** a chatbot, **not** an agent, and **not** an automation engine. It produces *context*, not actions.
 
@@ -69,10 +126,49 @@ graph TB
 ## Key Features
 
 - **23-Axis Human State Model**: Interpretable dimensions across cognitive, emotional, social, preference, control, and safety categories
+- **Works with ANY LLM**: Output is a string that injects into any system prompt
+- **Statistically Validated**: 85% of behavioral effects pass rigorous hypothesis testing
 - **Fast NLP Inference** (<500μs): Infer state from natural language without LLMs
 - **Research-Validated**: Anxiety detection validated against Dreaddit dataset (F1=0.68)
 - **Self-Report Sovereignty**: Explicit values always override inference (max inference confidence: 0.7)
-- **Auditable**: Every inference includes its source and reasoning
+
+## Statistical Validation
+
+Attuned's behavioral effects are rigorously validated using hypothesis testing with GPT-4o-mini:
+
+| Effect | Result | Effect Size (Cohen's d) |
+|--------|--------|-------------------------|
+| Verbosity control | 4/4 ✓ | d=7.40 (massive) |
+| Warmth/tone | 2/2 ✓ | d=4.11 (massive) |
+| Formality | 2/2 ✓ | d=0.83 (large) |
+| Cognitive load reduction | 2/2 ✓ | d=1.90 (large) |
+| Combined conditions | 2/3 ✓ | d=2.37 (large) |
+| **Total** | **11/13 (85%)** | |
+
+**Key findings:**
+- `verbosity_preference=0.2` → **70% shorter responses** (p<0.0001)
+- `warmth=0.9` → **6x more warm language indicators** (p<0.0001)
+- `cognitive_load=0.9` → **82% fewer multi-step plans** (p<0.0001)
+
+Effect size interpretation: d>0.8 is "large", d>2.0 is "very large"
+
+## What Attuned Produces
+
+When you call `state.prompt()`, you get text like this:
+
+```
+## Interaction Guidelines
+- Offer suggestions, not actions
+- Drafts require explicit user approval
+- Silence is acceptable if no action is required
+- Use warm, friendly language. Include encouraging phrases like 'Great question!'
+- Keep responses brief and to the point.
+
+Tone: warm-casual
+Verbosity: brief
+```
+
+This is injected into the LLM's system prompt. That's it. No magic. Just validated prompt engineering.
 
 ## Design Goals
 
@@ -89,7 +185,7 @@ graph TB
 - **No UI:** Library only (optional reference server feature-gated)
 - **No content memory:** Stores state descriptors, not personal content or message history
 
-## Quick Start
+## Quick Start (Rust)
 
 Add Attuned to your `Cargo.toml`:
 
@@ -224,6 +320,7 @@ graph BT
 
 | Crate | Description | Key Types |
 |-------|-------------|-----------|
+| `attuned-python` | **Python bindings (PyPI: `attuned`)** | `Attuned`, `Presets`, integrations |
 | `attuned-core` | Core types, axes, translators, telemetry | `StateSnapshot`, `PromptContext`, `Translator` |
 | `attuned-store` | Storage abstraction + in-memory backend | `StateStore`, `MemoryStore` |
 | `attuned-qdrant` | Qdrant vector database backend | `QdrantStore`, `QdrantConfig` |
@@ -384,7 +481,7 @@ mindmap
       tolerance_for_complexity
       urgency_sensitivity
     Emotional
-      emotional_intensity
+      emotional_openness
       emotional_stability
       anxiety_level
       need_for_reassurance
@@ -396,17 +493,17 @@ mindmap
       reciprocity_expectation
     Preferences
       ritual_need
-      directness_preference
+      transactional_preference
       verbosity_preference
-      structure_preference
+      directness_preference
     Control
-      autonomy_need
-      information_need
-      predictability_need
-      control_need
+      autonomy_preference
+      suggestion_tolerance
+      interruption_tolerance
+      reflection_vs_action_bias
     Safety
-      vulnerability_state
-      trust_level
+      stakes_awareness
+      privacy_sensitivity
 ```
 
 ### Axis Categories
@@ -414,11 +511,11 @@ mindmap
 | Category | Axes | Affects |
 |----------|------|---------|
 | **Cognitive** | `cognitive_load`, `decision_fatigue`, `tolerance_for_complexity`, `urgency_sensitivity` | Response complexity, pacing |
-| **Emotional** | `emotional_intensity`, `emotional_stability`, `anxiety_level`, `need_for_reassurance` | Empathy, reassurance level |
+| **Emotional** | `emotional_openness`, `emotional_stability`, `anxiety_level`, `need_for_reassurance` | Empathy, reassurance level |
 | **Social** | `warmth`, `formality`, `boundary_strength`, `assertiveness`, `reciprocity_expectation` | Tone, interaction style |
-| **Preferences** | `ritual_need`, `directness_preference`, `verbosity_preference`, `structure_preference` | Response format, length |
-| **Control** | `autonomy_need`, `information_need`, `predictability_need`, `control_need` | Agency, guidance level |
-| **Safety** | `vulnerability_state`, `trust_level` | Caution level, sensitivity |
+| **Preferences** | `ritual_need`, `transactional_preference`, `verbosity_preference`, `directness_preference` | Response format, length |
+| **Control** | `autonomy_preference`, `suggestion_tolerance`, `interruption_tolerance`, `reflection_vs_action_bias` | Agency, guidance level |
+| **Safety** | `stakes_awareness`, `privacy_sensitivity` | Caution level, sensitivity |
 
 ## Security
 
@@ -478,6 +575,7 @@ cargo clippy --workspace
 
 | Document | Description |
 |----------|-------------|
+| [Python README](crates/attuned-python/README.md) | Python quick start and integrations |
 | [TECHNICAL.md](TECHNICAL.md) | Quick-reference specification (data contracts, constraints, APIs) |
 | [MANIFESTO.md](MANIFESTO.md) | Philosophical principles and hard constraints |
 | [SECURITY.md](SECURITY.md) | Security policies and responsible disclosure |
