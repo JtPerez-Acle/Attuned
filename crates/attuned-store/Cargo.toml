@@ -1,6 +1,7 @@
 [package]
 name = "attuned-store"
 description = "Storage traits and in-memory backend for Attuned"
+readme = "README.md"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

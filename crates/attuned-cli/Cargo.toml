@@ -1,6 +1,7 @@
 [package]
 name = "attuned-cli"
 description = "CLI tool for Attuned development and testing"
+readme = "README.md"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

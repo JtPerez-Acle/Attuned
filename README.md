@@ -1,8 +1,9 @@
 # Attuned
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE-APACHE)
-[![PyPI](https://img.shields.io/badge/pypi-attuned-blue.svg)](https://pypi.org/project/attuned/)
-[![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org)
+[![Crates.io](https://img.shields.io/crates/v/attuned-core.svg)](https://crates.io/crates/attuned-core)
+[![PyPI](https://img.shields.io/pypi/v/attuned.svg)](https://pypi.org/project/attuned/)
+[![Rust](https://img.shields.io/badge/rust-1.83%2B-orange.svg)](https://www.rust-lang.org)
 [![Validated](https://img.shields.io/badge/validated-85%25-brightgreen.svg)](#statistical-validation)
 [![Manifesto](https://img.shields.io/badge/manifesto-read-purple.svg)](MANIFESTO.md)
 
@@ -10,9 +11,21 @@
 
 Attuned is the behavioral layer for LLM applications. Set user context, get conditioned responses. Works with any LLM.
 
+## Installation
+
+**Python** (recommended for most users):
 ```bash
 pip install attuned
 ```
+PyPI: https://pypi.org/project/attuned/
+
+**Rust**:
+```bash
+cargo add attuned-core attuned-store
+```
+crates.io: https://crates.io/crates/attuned-core
+
+---
 
 ## Quick Start (Python)
 
@@ -191,9 +204,9 @@ Add Attuned to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-attuned-core = "0.1"
-attuned-store = "0.1"
-attuned-infer = "0.1"  # Optional: NLP inference
+attuned-core = "1.0"
+attuned-store = "1.0"
+attuned-infer = "1.0"  # Optional: NLP inference
 tokio = { version = "1", features = ["full"] }
 ```
 
