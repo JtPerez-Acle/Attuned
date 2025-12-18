@@ -1,7 +1,7 @@
 //! Python bindings for axis definitions.
 
-use pyo3::prelude::*;
 use attuned_core::axes::{AxisCategory, AxisDefinition};
+use pyo3::prelude::*;
 
 /// Semantic category for grouping related axes.
 ///
@@ -43,14 +43,17 @@ impl PyAxisCategory {
     }
 
     fn __repr__(&self) -> String {
-        format!("AxisCategory.{}", match self {
-            PyAxisCategory::Cognitive => "Cognitive",
-            PyAxisCategory::Emotional => "Emotional",
-            PyAxisCategory::Social => "Social",
-            PyAxisCategory::Preferences => "Preferences",
-            PyAxisCategory::Control => "Control",
-            PyAxisCategory::Safety => "Safety",
-        })
+        format!(
+            "AxisCategory.{}",
+            match self {
+                PyAxisCategory::Cognitive => "Cognitive",
+                PyAxisCategory::Emotional => "Emotional",
+                PyAxisCategory::Social => "Social",
+                PyAxisCategory::Preferences => "Preferences",
+                PyAxisCategory::Control => "Control",
+                PyAxisCategory::Safety => "Safety",
+            }
+        )
     }
 }
 
@@ -239,7 +242,10 @@ impl From<&AxisDefinition> for PyAxisDefinition {
             since: axis.since.to_string(),
             deprecated_since: axis.deprecated.as_ref().map(|d| d.since.to_string()),
             deprecated_reason: axis.deprecated.as_ref().map(|d| d.reason.to_string()),
-            deprecated_replacement: axis.deprecated.as_ref().and_then(|d| d.replacement.map(|s| s.to_string())),
+            deprecated_replacement: axis
+                .deprecated
+                .as_ref()
+                .and_then(|d| d.replacement.map(|s| s.to_string())),
         }
     }
 }

@@ -16,11 +16,11 @@ use std::sync::Arc;
 use std::time::Instant;
 
 #[cfg(feature = "inference")]
-use std::collections::HashMap;
-#[cfg(feature = "inference")]
 use attuned_infer::{Baseline, InferenceConfig, InferenceEngine, InferenceSource};
 #[cfg(feature = "inference")]
 use dashmap::DashMap;
+#[cfg(feature = "inference")]
+use std::collections::HashMap;
 
 /// Application state shared across handlers.
 pub struct AppState<S: StateStore> {
@@ -189,7 +189,8 @@ pub async fn upsert_state<S: StateStore + 'static>(
     #[cfg(feature = "inference")]
     if let (Some(engine), Some(message)) = (&state.inference_engine, &body.message) {
         // Get or create baseline for user
-        let mut baseline_ref = state.baselines
+        let mut baseline_ref = state
+            .baselines
             .entry(body.user_id.clone())
             .or_insert_with(|| engine.new_baseline());
 
@@ -464,27 +465,21 @@ pub enum InferSourceResponse {
 impl From<&InferenceSource> for InferSourceResponse {
     fn from(source: &InferenceSource) -> Self {
         match source {
-            InferenceSource::Linguistic { features_used, .. } => {
-                InferSourceResponse::Linguistic {
-                    features_used: features_used.clone(),
-                }
-            }
-            InferenceSource::Delta { z_score, metric, .. } => {
-                InferSourceResponse::Delta {
-                    z_score: *z_score,
-                    metric: metric.clone(),
-                }
-            }
-            InferenceSource::Combined { sources, .. } => {
-                InferSourceResponse::Combined {
-                    source_count: sources.len(),
-                }
-            }
-            InferenceSource::Prior { reason } => {
-                InferSourceResponse::Prior {
-                    reason: reason.clone(),
-                }
-            }
+            InferenceSource::Linguistic { features_used, .. } => InferSourceResponse::Linguistic {
+                features_used: features_used.clone(),
+            },
+            InferenceSource::Delta {
+                z_score, metric, ..
+            } => InferSourceResponse::Delta {
+                z_score: *z_score,
+                metric: metric.clone(),
+            },
+            InferenceSource::Combined { sources, .. } => InferSourceResponse::Combined {
+                source_count: sources.len(),
+            },
+            InferenceSource::Prior { reason } => InferSourceResponse::Prior {
+                reason: reason.clone(),
+            },
             InferenceSource::Decayed { original, .. } => {
                 // Unwrap to original source
                 InferSourceResponse::from(original.as_ref())
@@ -530,7 +525,8 @@ pub async fn infer<S: StateStore + 'static>(
 
     // Run inference with optional baseline
     let inferred = if let Some(user_id) = &body.user_id {
-        let mut baseline_ref = state.baselines
+        let mut baseline_ref = state
+            .baselines
             .entry(user_id.clone())
             .or_insert_with(|| engine.new_baseline());
         engine.infer_with_baseline(&body.message, &mut baseline_ref, None)
@@ -557,16 +553,32 @@ pub async fn infer<S: StateStore + 'static>(
         map.insert("word_count".into(), serde_json::json!(f.word_count));
         map.insert("sentence_count".into(), serde_json::json!(f.sentence_count));
         map.insert("hedge_count".into(), serde_json::json!(f.hedge_count));
-        map.insert("urgency_word_count".into(), serde_json::json!(f.urgency_word_count));
-        map.insert("negative_emotion_count".into(), serde_json::json!(f.negative_emotion_count));
-        map.insert("exclamation_ratio".into(), serde_json::json!(f.exclamation_ratio));
+        map.insert(
+            "urgency_word_count".into(),
+            serde_json::json!(f.urgency_word_count),
+        );
+        map.insert(
+            "negative_emotion_count".into(),
+            serde_json::json!(f.negative_emotion_count),
+        );
+        map.insert(
+            "exclamation_ratio".into(),
+            serde_json::json!(f.exclamation_ratio),
+        );
         map.insert("question_ratio".into(), serde_json::json!(f.question_ratio));
         map.insert("caps_ratio".into(), serde_json::json!(f.caps_ratio));
-        map.insert("first_person_ratio".into(), serde_json::json!(f.first_person_ratio));
+        map.insert(
+            "first_person_ratio".into(),
+            serde_json::json!(f.first_person_ratio),
+        );
         Some(map)
     } else {
         None
     };
 
-    Json(InferResponse { estimates, features }).into_response()
+    Json(InferResponse {
+        estimates,
+        features,
+    })
+    .into_response()
 }

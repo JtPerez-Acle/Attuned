@@ -25,7 +25,7 @@ pub const MAX_INFERRED_CONFIDENCE: f32 = 0.7;
 /// # Returns
 /// A multiplier in [0.5, 1.0] to apply to base confidence
 pub fn word_count_confidence_factor(word_count: usize) -> f32 {
-    const MIN_WORDS: f32 = 10.0;   // Below this: reduced confidence
+    const MIN_WORDS: f32 = 10.0; // Below this: reduced confidence
     const STABLE_WORDS: f32 = 50.0; // At this point: full confidence
 
     if word_count < MIN_WORDS as usize {
@@ -133,14 +133,24 @@ impl InferenceSource {
             Self::Linguistic { features_used, .. } => {
                 format!("linguistic({})", features_used.join(", "))
             }
-            Self::Delta { metric, z_score, .. } => {
+            Self::Delta {
+                metric, z_score, ..
+            } => {
                 format!("delta({}: z={:.2})", metric, z_score)
             }
             Self::Combined { sources, .. } => {
                 format!("combined({})", sources.len())
             }
-            Self::Decayed { original, decay_factor, .. } => {
-                format!("decayed({}, factor={:.2})", original.summary(), decay_factor)
+            Self::Decayed {
+                original,
+                decay_factor,
+                ..
+            } => {
+                format!(
+                    "decayed({}, factor={:.2})",
+                    original.summary(),
+                    decay_factor
+                )
             }
             Self::Prior { reason } => format!("prior({})", reason),
         }
@@ -186,7 +196,10 @@ impl AxisEstimate {
         confidence: f32,
         source: InferenceSource,
     ) -> Self {
-        debug_assert!(source.is_inferred(), "Use self_report() for self-report values");
+        debug_assert!(
+            source.is_inferred(),
+            "Use self_report() for self-report values"
+        );
         Self {
             axis: axis.into(),
             value: value.clamp(0.0, 1.0),
@@ -212,13 +225,20 @@ impl AxisEstimate {
     }
 
     /// Create a prior estimate (default before any observation).
-    pub fn prior(axis: impl Into<String>, value: f32, confidence: f32, reason: impl Into<String>) -> Self {
+    pub fn prior(
+        axis: impl Into<String>,
+        value: f32,
+        confidence: f32,
+        reason: impl Into<String>,
+    ) -> Self {
         Self {
             axis: axis.into(),
             value: value.clamp(0.0, 1.0),
             confidence: confidence.min(MAX_INFERRED_CONFIDENCE),
             variance: Self::confidence_to_variance(confidence.min(MAX_INFERRED_CONFIDENCE)),
-            source: InferenceSource::Prior { reason: reason.into() },
+            source: InferenceSource::Prior {
+                reason: reason.into(),
+            },
             timestamp: Utc::now(),
         }
     }
@@ -336,7 +356,8 @@ impl InferredState {
     /// regardless of any existing inference.
     pub fn override_with_self_report(&mut self, axis: impl Into<String>, value: f32) {
         let axis = axis.into();
-        self.estimates.insert(axis.clone(), AxisEstimate::self_report(axis, value));
+        self.estimates
+            .insert(axis.clone(), AxisEstimate::self_report(axis, value));
     }
 
     /// Decay all inferred estimates.

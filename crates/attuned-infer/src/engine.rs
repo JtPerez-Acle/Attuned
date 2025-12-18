@@ -11,7 +11,9 @@ use std::collections::HashMap;
 
 use crate::bayesian::{BayesianConfig, BayesianUpdater, Observation, Prior};
 use crate::delta::{Baseline, DeltaAnalyzer};
-use crate::estimate::{max_confidence_for_axis, word_count_confidence_factor, InferenceSource, InferredState};
+use crate::estimate::{
+    max_confidence_for_axis, word_count_confidence_factor, InferenceSource, InferredState,
+};
 use crate::features::{LinguisticExtractor, LinguisticFeatures};
 
 /// Configuration for the inference engine.
@@ -52,20 +54,38 @@ impl InferenceConfig {
         let mut priors = HashMap::new();
 
         // Cognitive - default to moderate load
-        priors.insert("cognitive_load".into(), Prior::from_value(0.4, 0.3, "typical user"));
-        priors.insert("decision_fatigue".into(), Prior::from_value(0.3, 0.3, "typical user"));
+        priors.insert(
+            "cognitive_load".into(),
+            Prior::from_value(0.4, 0.3, "typical user"),
+        );
+        priors.insert(
+            "decision_fatigue".into(),
+            Prior::from_value(0.3, 0.3, "typical user"),
+        );
         priors.insert("tolerance_for_complexity".into(), Prior::neutral());
-        priors.insert("urgency_sensitivity".into(), Prior::from_value(0.3, 0.3, "most queries not urgent"));
+        priors.insert(
+            "urgency_sensitivity".into(),
+            Prior::from_value(0.3, 0.3, "most queries not urgent"),
+        );
 
         // Emotional - default to stable
         priors.insert("emotional_intensity".into(), Prior::neutral());
-        priors.insert("emotional_stability".into(), Prior::from_value(0.6, 0.3, "assume stable"));
-        priors.insert("anxiety_level".into(), Prior::from_value(0.3, 0.3, "assume calm"));
+        priors.insert(
+            "emotional_stability".into(),
+            Prior::from_value(0.6, 0.3, "assume stable"),
+        );
+        priors.insert(
+            "anxiety_level".into(),
+            Prior::from_value(0.3, 0.3, "assume calm"),
+        );
         priors.insert("need_for_reassurance".into(), Prior::neutral());
 
         // Social - slightly warm/casual for digital interactions
         priors.insert("warmth".into(), Prior::from_value(0.5, 0.3, "neutral"));
-        priors.insert("formality".into(), Prior::from_value(0.4, 0.3, "digital tends casual"));
+        priors.insert(
+            "formality".into(),
+            Prior::from_value(0.4, 0.3, "digital tends casual"),
+        );
         priors.insert("boundary_strength".into(), Prior::neutral());
         priors.insert("assertiveness".into(), Prior::neutral());
         priors.insert("reciprocity_expectation".into(), Prior::neutral());
@@ -77,14 +97,23 @@ impl InferenceConfig {
         priors.insert("directness_preference".into(), Prior::neutral());
 
         // Control - slightly prefer autonomy
-        priors.insert("autonomy_preference".into(), Prior::from_value(0.6, 0.3, "users prefer control"));
+        priors.insert(
+            "autonomy_preference".into(),
+            Prior::from_value(0.6, 0.3, "users prefer control"),
+        );
         priors.insert("suggestion_tolerance".into(), Prior::neutral());
-        priors.insert("interruption_tolerance".into(), Prior::from_value(0.4, 0.3, "low by default"));
+        priors.insert(
+            "interruption_tolerance".into(),
+            Prior::from_value(0.4, 0.3, "low by default"),
+        );
         priors.insert("reflection_vs_action_bias".into(), Prior::neutral());
 
         // Safety - moderate defaults
         priors.insert("stakes_awareness".into(), Prior::neutral());
-        priors.insert("privacy_sensitivity".into(), Prior::from_value(0.6, 0.3, "assume privacy-conscious"));
+        priors.insert(
+            "privacy_sensitivity".into(),
+            Prior::from_value(0.6, 0.3, "assume privacy-conscious"),
+        );
 
         priors
     }
@@ -164,7 +193,8 @@ impl InferenceEngine {
             estimate.confidence = estimate.confidence.min(axis_cap);
 
             // Recalculate variance from adjusted confidence
-            estimate.variance = crate::estimate::AxisEstimate::confidence_to_variance(estimate.confidence);
+            estimate.variance =
+                crate::estimate::AxisEstimate::confidence_to_variance(estimate.confidence);
 
             if estimate.confidence >= self.config.min_confidence {
                 state.update(estimate);
@@ -244,7 +274,10 @@ impl InferenceEngine {
                     metric.to_string(),
                     signals.baseline_size,
                 );
-                axis_observations.entry(axis.to_string()).or_default().push(obs);
+                axis_observations
+                    .entry(axis.to_string())
+                    .or_default()
+                    .push(obs);
             }
         }
 
@@ -260,7 +293,9 @@ impl InferenceEngine {
                 })
                 .unwrap_or_else(|| self.get_prior(&axis));
 
-            let estimate = self.bayesian.combine_observations(&axis, &prior, &observations);
+            let estimate = self
+                .bayesian
+                .combine_observations(&axis, &prior, &observations);
 
             if estimate.confidence >= self.config.min_confidence {
                 state.update(estimate);
@@ -281,14 +316,22 @@ impl InferenceEngine {
         mappings.push((
             "tolerance_for_complexity".into(),
             f.complexity_score(),
-            vec!["reading_grade_level".into(), "avg_sentence_length".into(), "long_word_ratio".into()],
+            vec![
+                "reading_grade_level".into(),
+                "avg_sentence_length".into(),
+                "long_word_ratio".into(),
+            ],
         ));
 
         // Urgency
         mappings.push((
             "urgency_sensitivity".into(),
             f.urgency_score(),
-            vec!["urgency_word_count".into(), "imperative_count".into(), "exclamation_ratio".into()],
+            vec![
+                "urgency_word_count".into(),
+                "imperative_count".into(),
+                "exclamation_ratio".into(),
+            ],
         ));
 
         // Emotional axes
@@ -328,13 +371,18 @@ impl InferenceEngine {
         ));
 
         // Warmth - informal + positive emotional signals = warmth
-        let warmth = (1.0 - f.formality_score()) * 0.5 + f.emotional_intensity() * 0.3 +
-                     (f.politeness_count as f32 / 3.0).clamp(0.0, 1.0) * 0.2;
+        let warmth = (1.0 - f.formality_score()) * 0.5
+            + f.emotional_intensity() * 0.3
+            + (f.politeness_count as f32 / 3.0).clamp(0.0, 1.0) * 0.2;
         if f.politeness_count > 0 || f.emotional_intensity() > 0.2 {
             mappings.push((
                 "warmth".into(),
                 warmth.clamp(0.0, 1.0),
-                vec!["politeness_count".into(), "emotional_intensity".into(), "formality".into()],
+                vec![
+                    "politeness_count".into(),
+                    "emotional_intensity".into(),
+                    "formality".into(),
+                ],
             ));
         }
 
@@ -346,7 +394,11 @@ impl InferenceEngine {
             mappings.push((
                 "assertiveness".into(),
                 assertiveness.clamp(0.0, 1.0),
-                vec!["certainty_count".into(), "imperative_count".into(), "hedge_count".into()],
+                vec![
+                    "certainty_count".into(),
+                    "imperative_count".into(),
+                    "hedge_count".into(),
+                ],
             ));
         }
 
@@ -430,7 +482,7 @@ mod tests {
         let state = engine.infer(
             "Hello, how are you doing today? I hope everything is going well with your project. \
              I wanted to reach out and see if you have any updates on the proposal we discussed \
-             last week. Please let me know when you have a moment to chat about it."
+             last week. Please let me know when you have a moment to chat about it.",
         );
 
         // Should have some estimates
@@ -444,7 +496,7 @@ mod tests {
         let state = engine.infer(
             "URGENT! I need help immediately! This is absolutely critical and cannot wait! \
              The system is down and customers are affected. Please respond ASAP! We need \
-             to fix this right now before it gets worse! This is an emergency situation!"
+             to fix this right now before it gets worse! This is an emergency situation!",
         );
 
         let urgency = state.get("urgency_sensitivity");
@@ -460,7 +512,7 @@ mod tests {
              of my application for the senior developer position. I submitted my application \
              materials on the first of the month and would greatly appreciate any update \
              you could provide regarding the review process. I would be most grateful for \
-             your prompt response to this matter. Yours sincerely and with respect."
+             your prompt response to this matter. Yours sincerely and with respect.",
         );
 
         let formality = state.get("formality");
@@ -475,7 +527,7 @@ mod tests {
             "I think maybe this might be a problem? I'm not really sure but perhaps \
              we should probably look into it, if that's okay? I'm worried this could \
              cause issues later. I feel anxious about the whole situation and I'm \
-             struggling to figure out what to do. Maybe I'm overthinking it though?"
+             struggling to figure out what to do. Maybe I'm overthinking it though?",
         );
 
         // Should detect anxiety/uncertainty
@@ -501,11 +553,8 @@ mod tests {
         }
 
         // Now test with different message
-        let state = engine.infer_with_baseline(
-            "HELP! Everything is broken!!!",
-            &mut baseline,
-            None,
-        );
+        let state =
+            engine.infer_with_baseline("HELP! Everything is broken!!!", &mut baseline, None);
 
         // Should detect the deviation
         assert!(!state.is_empty());
@@ -538,7 +587,7 @@ mod tests {
         // Need sufficient text for word count confidence scaling
         let state = infer(
             "Hello world, this is a test message to verify the inference function works \
-             correctly with enough words to pass the confidence threshold for analysis."
+             correctly with enough words to pass the confidence threshold for analysis.",
         );
         assert!(!state.is_empty());
     }

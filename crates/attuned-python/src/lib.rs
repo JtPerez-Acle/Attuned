@@ -5,15 +5,15 @@
 
 use pyo3::prelude::*;
 
-mod snapshot;
-mod translator;
 mod axes;
 mod client;
+mod snapshot;
+mod translator;
 
-use snapshot::{PyStateSnapshot, PyStateSnapshotBuilder, PySource};
-use translator::{PyPromptContext, PyVerbosity, PyRuleTranslator, PyThresholds};
-use axes::{PyAxisDefinition, PyAxisCategory};
+use axes::{PyAxisCategory, PyAxisDefinition};
 use client::PyAttunedClient;
+use snapshot::{PySource, PyStateSnapshot, PyStateSnapshotBuilder};
+use translator::{PyPromptContext, PyRuleTranslator, PyThresholds, PyVerbosity};
 
 /// Get an axis definition by name.
 ///
@@ -50,7 +50,10 @@ fn is_valid_axis_name(name: &str) -> bool {
 ///     List of all 23 canonical axis names
 #[pyfunction]
 fn get_axis_names() -> Vec<&'static str> {
-    attuned_core::CANONICAL_AXES.iter().map(|a| a.name).collect()
+    attuned_core::CANONICAL_AXES
+        .iter()
+        .map(|a| a.name)
+        .collect()
 }
 
 /// Get all canonical axes.
@@ -59,7 +62,10 @@ fn get_axis_names() -> Vec<&'static str> {
 ///     List of all 23 AxisDefinition objects with full metadata
 #[pyfunction]
 fn get_all_axes() -> Vec<PyAxisDefinition> {
-    attuned_core::CANONICAL_AXES.iter().map(PyAxisDefinition::from).collect()
+    attuned_core::CANONICAL_AXES
+        .iter()
+        .map(PyAxisDefinition::from)
+        .collect()
 }
 
 /// Python module for Attuned.

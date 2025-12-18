@@ -2,8 +2,8 @@
 //!
 //! Target: <100μs for linguistic extraction, <1ms for full pipeline.
 
-use attuned_infer::{InferenceEngine, LinguisticExtractor, Baseline};
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
+use attuned_infer::{Baseline, InferenceEngine, LinguisticExtractor};
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
 const SHORT_TEXT: &str = "Hello, how are you?";
 
@@ -24,17 +24,23 @@ fn bench_linguistic_extraction(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("linguistic_extraction");
 
-    group.bench_with_input(BenchmarkId::new("short", "19 chars"), SHORT_TEXT, |b, text| {
-        b.iter(|| extractor.extract(black_box(text)))
-    });
+    group.bench_with_input(
+        BenchmarkId::new("short", "19 chars"),
+        SHORT_TEXT,
+        |b, text| b.iter(|| extractor.extract(black_box(text))),
+    );
 
-    group.bench_with_input(BenchmarkId::new("medium", "180 chars"), MEDIUM_TEXT, |b, text| {
-        b.iter(|| extractor.extract(black_box(text)))
-    });
+    group.bench_with_input(
+        BenchmarkId::new("medium", "180 chars"),
+        MEDIUM_TEXT,
+        |b, text| b.iter(|| extractor.extract(black_box(text))),
+    );
 
-    group.bench_with_input(BenchmarkId::new("long", "800 chars"), LONG_TEXT, |b, text| {
-        b.iter(|| extractor.extract(black_box(text)))
-    });
+    group.bench_with_input(
+        BenchmarkId::new("long", "800 chars"),
+        LONG_TEXT,
+        |b, text| b.iter(|| extractor.extract(black_box(text))),
+    );
 
     group.finish();
 }
@@ -44,17 +50,23 @@ fn bench_full_inference(c: &mut Criterion) {
 
     let mut group = c.benchmark_group("full_inference");
 
-    group.bench_with_input(BenchmarkId::new("short", "19 chars"), SHORT_TEXT, |b, text| {
-        b.iter(|| engine.infer(black_box(text)))
-    });
+    group.bench_with_input(
+        BenchmarkId::new("short", "19 chars"),
+        SHORT_TEXT,
+        |b, text| b.iter(|| engine.infer(black_box(text))),
+    );
 
-    group.bench_with_input(BenchmarkId::new("medium", "180 chars"), MEDIUM_TEXT, |b, text| {
-        b.iter(|| engine.infer(black_box(text)))
-    });
+    group.bench_with_input(
+        BenchmarkId::new("medium", "180 chars"),
+        MEDIUM_TEXT,
+        |b, text| b.iter(|| engine.infer(black_box(text))),
+    );
 
-    group.bench_with_input(BenchmarkId::new("long", "800 chars"), LONG_TEXT, |b, text| {
-        b.iter(|| engine.infer(black_box(text)))
-    });
+    group.bench_with_input(
+        BenchmarkId::new("long", "800 chars"),
+        LONG_TEXT,
+        |b, text| b.iter(|| engine.infer(black_box(text))),
+    );
 
     group.finish();
 }
@@ -72,9 +84,7 @@ fn bench_inference_with_baseline(c: &mut Criterion) {
                 }
                 baseline
             },
-            |mut baseline| {
-                engine.infer_with_baseline(black_box(LONG_TEXT), &mut baseline, None)
-            },
+            |mut baseline| engine.infer_with_baseline(black_box(LONG_TEXT), &mut baseline, None),
             criterion::BatchSize::SmallInput,
         )
     });

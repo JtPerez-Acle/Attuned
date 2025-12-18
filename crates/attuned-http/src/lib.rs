@@ -71,4 +71,4 @@ pub use server::Server;
 
 // Re-export inference types when feature is enabled
 #[cfg(feature = "inference")]
-pub use handlers::{InferRequest, InferResponse, InferEstimate, InferSourceResponse};
+pub use handlers::{InferEstimate, InferRequest, InferResponse, InferSourceResponse};

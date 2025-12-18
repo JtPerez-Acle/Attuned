@@ -30,7 +30,10 @@ impl<S: StateStore + HealthCheck + 'static> Server<S> {
     pub fn new(store: S, config: ServerConfig) -> Self {
         #[cfg(feature = "inference")]
         let state = if config.enable_inference {
-            Arc::new(AppState::with_inference(store, config.inference_config.clone()))
+            Arc::new(AppState::with_inference(
+                store,
+                config.inference_config.clone(),
+            ))
         } else {
             Arc::new(AppState::new(store))
         };
@@ -223,19 +226,10 @@ mod tests {
 
         // Verify security headers
         let headers = response.headers();
-        assert_eq!(
-            headers.get("x-content-type-options").unwrap(),
-            "nosniff"
-        );
+        assert_eq!(headers.get("x-content-type-options").unwrap(), "nosniff");
         assert_eq!(headers.get("x-frame-options").unwrap(), "DENY");
-        assert_eq!(
-            headers.get("x-xss-protection").unwrap(),
-            "1; mode=block"
-        );
+        assert_eq!(headers.get("x-xss-protection").unwrap(), "1; mode=block");
         assert!(headers.get("content-security-policy").is_some());
-        assert_eq!(
-            headers.get("cache-control").unwrap(),
-            "no-store, max-age=0"
-        );
+        assert_eq!(headers.get("cache-control").unwrap(), "no-store, max-age=0");
     }
 }

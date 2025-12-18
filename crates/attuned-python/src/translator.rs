@@ -1,9 +1,9 @@
 //! Python bindings for translator types.
 
-use pyo3::prelude::*;
-use pyo3::exceptions::PyValueError;
-use attuned_core::{PromptContext, Verbosity, RuleTranslator, Thresholds, Translator};
 use crate::snapshot::PyStateSnapshot;
+use attuned_core::{PromptContext, RuleTranslator, Thresholds, Translator, Verbosity};
+use pyo3::exceptions::PyValueError;
+use pyo3::prelude::*;
 
 /// Output verbosity level for LLM responses.
 ///
@@ -46,11 +46,14 @@ impl PyVerbosity {
     }
 
     fn __repr__(&self) -> String {
-        format!("Verbosity.{}", match self {
-            PyVerbosity::Low => "Low",
-            PyVerbosity::Medium => "Medium",
-            PyVerbosity::High => "High",
-        })
+        format!(
+            "Verbosity.{}",
+            match self {
+                PyVerbosity::Low => "Low",
+                PyVerbosity::Medium => "Medium",
+                PyVerbosity::High => "High",
+            }
+        )
     }
 }
 
@@ -139,11 +142,14 @@ impl PyPromptContext {
         }
 
         parts.push(format!("Tone: {}", self.inner.tone));
-        parts.push(format!("Verbosity: {}", match self.inner.verbosity {
-            Verbosity::Low => "brief",
-            Verbosity::Medium => "balanced",
-            Verbosity::High => "comprehensive",
-        }));
+        parts.push(format!(
+            "Verbosity: {}",
+            match self.inner.verbosity {
+                Verbosity::Low => "brief",
+                Verbosity::Medium => "balanced",
+                Verbosity::High => "comprehensive",
+            }
+        ));
 
         if !self.inner.flags.is_empty() {
             parts.push(format!("Active flags: {}", self.inner.flags.join(", ")));
@@ -193,7 +199,7 @@ impl From<PromptContext> for PyPromptContext {
 ///     hi: Values above this are considered "high" (default: 0.7)
 ///     lo: Values below this are considered "low" (default: 0.3)
 #[pyclass(name = "Thresholds")]
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct PyThresholds {
     pub(crate) inner: Thresholds,
 }
@@ -215,7 +221,7 @@ impl PyThresholds {
             return Err(PyValueError::new_err("thresholds must be in [0.0, 1.0]"));
         }
         Ok(PyThresholds {
-            inner: Thresholds { hi, lo }
+            inner: Thresholds { hi, lo },
         })
     }
 
@@ -233,14 +239,6 @@ impl PyThresholds {
 
     fn __repr__(&self) -> String {
         format!("Thresholds(hi={}, lo={})", self.inner.hi, self.inner.lo)
-    }
-}
-
-impl Default for PyThresholds {
-    fn default() -> Self {
-        PyThresholds {
-            inner: Thresholds::default()
-        }
     }
 }
 
@@ -282,7 +280,7 @@ impl PyRuleTranslator {
     #[getter]
     fn thresholds(&self) -> PyThresholds {
         PyThresholds {
-            inner: self.inner.thresholds.clone()
+            inner: self.inner.thresholds.clone(),
         }
     }
 
@@ -310,8 +308,7 @@ impl PyRuleTranslator {
     fn __repr__(&self) -> String {
         format!(
             "RuleTranslator(thresholds=Thresholds(hi={}, lo={}))",
-            self.inner.thresholds.hi,
-            self.inner.thresholds.lo
+            self.inner.thresholds.hi, self.inner.thresholds.lo
         )
     }
 }

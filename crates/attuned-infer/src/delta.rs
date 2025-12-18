@@ -381,7 +381,9 @@ mod tests {
 
         // Build baseline with calm messages
         for _ in 0..10 {
-            baseline.add(&make_features("Here is my regular question about the product."));
+            baseline.add(&make_features(
+                "Here is my regular question about the product.",
+            ));
         }
 
         // Analyze urgent message
@@ -440,9 +442,13 @@ mod tests {
         let adjustments = analyzer.to_axis_adjustments(&signals);
 
         // Should have urgency adjustment
-        assert!(adjustments.iter().any(|(axis, _)| *axis == "urgency_sensitivity"));
+        assert!(adjustments
+            .iter()
+            .any(|(axis, _)| *axis == "urgency_sensitivity"));
         // Should not have emotional adjustment (below threshold)
-        assert!(!adjustments.iter().any(|(axis, _)| *axis == "emotional_intensity"));
+        assert!(!adjustments
+            .iter()
+            .any(|(axis, _)| *axis == "emotional_intensity"));
     }
 
     #[test]

@@ -1,11 +1,11 @@
 //! Async HTTP client for Attuned server.
 
-use pyo3::prelude::*;
-use pyo3::exceptions::{PyValueError, PyRuntimeError, PyConnectionError};
-use std::sync::Arc;
-use tokio::runtime::Runtime;
 use crate::snapshot::PyStateSnapshot;
 use crate::translator::PyPromptContext;
+use pyo3::exceptions::{PyConnectionError, PyRuntimeError, PyValueError};
+use pyo3::prelude::*;
+use std::sync::Arc;
+use tokio::runtime::Runtime;
 
 /// HTTP client for interacting with an Attuned server.
 ///
@@ -81,7 +81,8 @@ impl PyAttunedClient {
             .map_err(|e| PyValueError::new_err(format!("Serialization error: {}", e)))?;
 
         self.runtime.block_on(async {
-            let mut req = self.client
+            let mut req = self
+                .client
                 .post(&url)
                 .header("Content-Type", "application/json")
                 .body(body);
@@ -90,14 +91,18 @@ impl PyAttunedClient {
                 req = req.header("Authorization", format!("Bearer {}", key));
             }
 
-            let resp = req.send().await
+            let resp = req
+                .send()
+                .await
                 .map_err(|e| PyConnectionError::new_err(format!("Connection error: {}", e)))?;
 
             if !resp.status().is_success() {
                 let status = resp.status();
                 let body = resp.text().await.unwrap_or_default();
                 return Err(PyRuntimeError::new_err(format!(
-                    "Server error {}: {}", status.as_u16(), body
+                    "Server error {}: {}",
+                    status.as_u16(),
+                    body
                 )));
             }
 
@@ -126,7 +131,9 @@ impl PyAttunedClient {
                 req = req.header("Authorization", format!("Bearer {}", key));
             }
 
-            let resp = req.send().await
+            let resp = req
+                .send()
+                .await
                 .map_err(|e| PyConnectionError::new_err(format!("Connection error: {}", e)))?;
 
             if resp.status().as_u16() == 404 {
@@ -137,11 +144,15 @@ impl PyAttunedClient {
                 let status = resp.status();
                 let body = resp.text().await.unwrap_or_default();
                 return Err(PyRuntimeError::new_err(format!(
-                    "Server error {}: {}", status.as_u16(), body
+                    "Server error {}: {}",
+                    status.as_u16(),
+                    body
                 )));
             }
 
-            let body = resp.text().await
+            let body = resp
+                .text()
+                .await
                 .map_err(|e| PyRuntimeError::new_err(format!("Failed to read response: {}", e)))?;
 
             let snapshot: attuned_core::StateSnapshot = serde_json::from_str(&body)
@@ -173,12 +184,15 @@ impl PyAttunedClient {
                 req = req.header("Authorization", format!("Bearer {}", key));
             }
 
-            let resp = req.send().await
+            let resp = req
+                .send()
+                .await
                 .map_err(|e| PyConnectionError::new_err(format!("Connection error: {}", e)))?;
 
             if resp.status().as_u16() == 404 {
                 return Err(PyValueError::new_err(format!(
-                    "No state found for user: {}", user_id
+                    "No state found for user: {}",
+                    user_id
                 )));
             }
 
@@ -186,11 +200,15 @@ impl PyAttunedClient {
                 let status = resp.status();
                 let body = resp.text().await.unwrap_or_default();
                 return Err(PyRuntimeError::new_err(format!(
-                    "Server error {}: {}", status.as_u16(), body
+                    "Server error {}: {}",
+                    status.as_u16(),
+                    body
                 )));
             }
 
-            let body = resp.text().await
+            let body = resp
+                .text()
+                .await
                 .map_err(|e| PyRuntimeError::new_err(format!("Failed to read response: {}", e)))?;
 
             let context: attuned_core::PromptContext = serde_json::from_str(&body)
@@ -221,7 +239,9 @@ impl PyAttunedClient {
                 req = req.header("Authorization", format!("Bearer {}", key));
             }
 
-            let resp = req.send().await
+            let resp = req
+                .send()
+                .await
                 .map_err(|e| PyConnectionError::new_err(format!("Connection error: {}", e)))?;
 
             if resp.status().as_u16() == 404 {
@@ -232,7 +252,9 @@ impl PyAttunedClient {
                 let status = resp.status();
                 let body = resp.text().await.unwrap_or_default();
                 return Err(PyRuntimeError::new_err(format!(
-                    "Server error {}: {}", status.as_u16(), body
+                    "Server error {}: {}",
+                    status.as_u16(),
+                    body
                 )));
             }
 
@@ -251,7 +273,11 @@ impl PyAttunedClient {
         let url = format!("{}/health", self.base_url);
 
         self.runtime.block_on(async {
-            let resp = self.client.get(&url).send().await
+            let resp = self
+                .client
+                .get(&url)
+                .send()
+                .await
                 .map_err(|e| PyConnectionError::new_err(format!("Connection error: {}", e)))?;
 
             Ok(resp.status().is_success())

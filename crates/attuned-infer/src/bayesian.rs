@@ -146,8 +146,8 @@ pub struct BayesianConfig {
 impl Default for BayesianConfig {
     fn default() -> Self {
         Self {
-            max_update: 0.3,          // Max 0.3 shift per observation
-            min_variance: 0.001,      // Never fully certain
+            max_update: 0.3,              // Max 0.3 shift per observation
+            min_variance: 0.001,          // Never fully certain
             variance_growth_rate: 0.0001, // Slow uncertainty growth
             max_inferred_confidence: MAX_INFERRED_CONFIDENCE,
         }
@@ -158,7 +158,7 @@ impl Default for BayesianConfig {
 ///
 /// Maintains posterior distribution (mean, variance) and updates
 /// with each observation using standard Bayesian updating.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct BayesianUpdater {
     config: BayesianConfig,
 }
@@ -193,8 +193,8 @@ impl BayesianUpdater {
         let posterior_precision = prior_precision + obs_precision;
         let posterior_variance = (1.0 / posterior_precision).max(self.config.min_variance);
 
-        let posterior_mean = posterior_variance
-            * (prior.mean * prior_precision + observation.value * obs_precision);
+        let posterior_mean =
+            posterior_variance * (prior.mean * prior_precision + observation.value * obs_precision);
 
         // Apply max update constraint
         let clamped_mean = if (posterior_mean - prior.mean).abs() > self.config.max_update {
@@ -330,14 +330,6 @@ impl BayesianUpdater {
     }
 }
 
-impl Default for BayesianUpdater {
-    fn default() -> Self {
-        Self {
-            config: BayesianConfig::default(),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -360,7 +352,7 @@ mod tests {
         // Should move toward observation
         assert!(posterior.value > prior.mean);
         assert!(posterior.value < 0.8); // But not all the way
-        // Variance should decrease
+                                        // Variance should decrease
         assert!(posterior.variance < prior.variance);
     }
 
@@ -412,10 +404,14 @@ mod tests {
         let prior = Prior::neutral();
 
         // Many confident observations
-        let obs = Observation::new(0.8, 0.001, InferenceSource::Linguistic {
-            features_used: vec![],
-            feature_values: std::collections::HashMap::new(),
-        });
+        let obs = Observation::new(
+            0.8,
+            0.001,
+            InferenceSource::Linguistic {
+                features_used: vec![],
+                feature_values: std::collections::HashMap::new(),
+            },
+        );
 
         let posterior = updater.update("warmth", &prior, &obs);
 

@@ -1,9 +1,9 @@
 //! Python bindings for StateSnapshot and related types.
 
-use pyo3::prelude::*;
+use attuned_core::{Source, StateSnapshot};
 use pyo3::exceptions::PyValueError;
+use pyo3::prelude::*;
 use std::collections::HashMap;
-use attuned_core::{StateSnapshot, Source};
 
 /// Source of a state snapshot - how the data was obtained.
 ///
@@ -52,11 +52,14 @@ impl PySource {
     }
 
     fn __repr__(&self) -> String {
-        format!("Source.{}", match self {
-            PySource::SelfReport => "SelfReport",
-            PySource::Inferred => "Inferred",
-            PySource::Mixed => "Mixed",
-        })
+        format!(
+            "Source.{}",
+            match self {
+                PySource::SelfReport => "SelfReport",
+                PySource::Inferred => "Inferred",
+                PySource::Mixed => "Mixed",
+            }
+        )
     }
 }
 
@@ -140,7 +143,11 @@ impl PyStateSnapshot {
     /// Get all axes as a dictionary.
     #[getter]
     fn axes(&self) -> HashMap<String, f32> {
-        self.inner.axes.iter().map(|(k, v)| (k.clone(), *v)).collect()
+        self.inner
+            .axes
+            .iter()
+            .map(|(k, v)| (k.clone(), *v))
+            .collect()
     }
 
     /// Get an axis value, returning the default (0.5) if not present.
@@ -312,9 +319,10 @@ impl PyStateSnapshotBuilder {
     /// Raises:
     ///     ValueError: If validation fails (missing user_id, invalid axis values, etc.)
     fn build(&self) -> PyResult<PyStateSnapshot> {
-        let user_id = self.user_id.clone().ok_or_else(|| {
-            PyValueError::new_err("user_id is required")
-        })?;
+        let user_id = self
+            .user_id
+            .clone()
+            .ok_or_else(|| PyValueError::new_err("user_id is required"))?;
 
         let mut builder = StateSnapshot::builder()
             .user_id(user_id)
@@ -329,7 +337,8 @@ impl PyStateSnapshotBuilder {
             builder = builder.axis(name.clone(), *value);
         }
 
-        builder.build()
+        builder
+            .build()
             .map(PyStateSnapshot::from)
             .map_err(|e| PyValueError::new_err(format!("Validation error: {}", e)))
     }

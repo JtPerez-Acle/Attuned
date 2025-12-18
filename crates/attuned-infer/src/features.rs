@@ -157,11 +157,7 @@ impl LinguisticExtractor {
 
         // Flesch-Kincaid grade level approximation
         let syllables = self.estimate_syllables(&words);
-        let reading_grade_level = self.flesch_kincaid_grade(
-            word_count,
-            sentence_count,
-            syllables,
-        );
+        let reading_grade_level = self.flesch_kincaid_grade(word_count, sentence_count, syllables);
 
         // Punctuation analysis
         let exclamation_count = chars.iter().filter(|&&c| c == '!').count();
@@ -309,12 +305,36 @@ impl LinguisticExtractor {
     /// Count hedge/uncertainty words.
     fn count_hedge_words(&self, words: &[&str]) -> usize {
         const HEDGE_WORDS: &[&str] = &[
-            "maybe", "perhaps", "possibly", "probably", "might", "could",
-            "seem", "seems", "seemed", "appear", "appears", "appeared",
-            "think", "believe", "guess", "suppose", "assume",
-            "somewhat", "fairly", "rather", "quite", "sort",
-            "kind", "mostly", "generally", "usually", "often",
-            "uncertain", "unsure", "unclear",
+            "maybe",
+            "perhaps",
+            "possibly",
+            "probably",
+            "might",
+            "could",
+            "seem",
+            "seems",
+            "seemed",
+            "appear",
+            "appears",
+            "appeared",
+            "think",
+            "believe",
+            "guess",
+            "suppose",
+            "assume",
+            "somewhat",
+            "fairly",
+            "rather",
+            "quite",
+            "sort",
+            "kind",
+            "mostly",
+            "generally",
+            "usually",
+            "often",
+            "uncertain",
+            "unsure",
+            "unclear",
         ];
 
         words
@@ -326,9 +346,22 @@ impl LinguisticExtractor {
     /// Count certainty/confidence markers.
     fn count_certainty_markers(&self, words: &[&str]) -> usize {
         const CERTAINTY_WORDS: &[&str] = &[
-            "definitely", "absolutely", "certainly", "clearly", "obviously",
-            "surely", "undoubtedly", "always", "never", "must", "will",
-            "proven", "fact", "guarantee", "positive", "confident",
+            "definitely",
+            "absolutely",
+            "certainly",
+            "clearly",
+            "obviously",
+            "surely",
+            "undoubtedly",
+            "always",
+            "never",
+            "must",
+            "will",
+            "proven",
+            "fact",
+            "guarantee",
+            "positive",
+            "confident",
         ];
 
         words
@@ -373,9 +406,19 @@ impl LinguisticExtractor {
     /// Count politeness markers.
     fn count_politeness_markers(&self, words: &[&str]) -> usize {
         const POLITE_WORDS: &[&str] = &[
-            "please", "thanks", "thank", "appreciate", "grateful",
-            "sorry", "apologies", "apologize", "excuse", "pardon",
-            "kindly", "welcome", "regards",
+            "please",
+            "thanks",
+            "thank",
+            "appreciate",
+            "grateful",
+            "sorry",
+            "apologies",
+            "apologize",
+            "excuse",
+            "pardon",
+            "kindly",
+            "welcome",
+            "regards",
         ];
 
         words
@@ -386,7 +429,8 @@ impl LinguisticExtractor {
 
     /// Calculate first-person pronoun ratio.
     fn first_person_ratio(&self, words: &[&str]) -> f32 {
-        const FIRST_PERSON: &[&str] = &["i", "me", "my", "mine", "myself", "we", "us", "our", "ours"];
+        const FIRST_PERSON: &[&str] =
+            &["i", "me", "my", "mine", "myself", "we", "us", "our", "ours"];
 
         let count = words
             .iter()
@@ -403,10 +447,26 @@ impl LinguisticExtractor {
     /// Count urgency words.
     fn count_urgency_words(&self, words: &[&str]) -> usize {
         const URGENCY_WORDS: &[&str] = &[
-            "urgent", "urgently", "asap", "immediately", "emergency",
-            "critical", "crucial", "vital", "essential", "pressing",
-            "now", "today", "deadline", "hurry", "quick", "quickly",
-            "fast", "rush", "priority", "important",
+            "urgent",
+            "urgently",
+            "asap",
+            "immediately",
+            "emergency",
+            "critical",
+            "crucial",
+            "vital",
+            "essential",
+            "pressing",
+            "now",
+            "today",
+            "deadline",
+            "hurry",
+            "quick",
+            "quickly",
+            "fast",
+            "rush",
+            "priority",
+            "important",
         ];
 
         words
@@ -418,9 +478,9 @@ impl LinguisticExtractor {
     /// Count imperative sentence starters.
     fn count_imperatives(&self, text: &str) -> usize {
         const IMPERATIVE_STARTERS: &[&str] = &[
-            "do ", "don't ", "please ", "make ", "let ", "get ", "take ",
-            "give ", "tell ", "show ", "help ", "send ", "check ", "read ",
-            "write ", "call ", "stop ", "start ", "go ", "come ",
+            "do ", "don't ", "please ", "make ", "let ", "get ", "take ", "give ", "tell ",
+            "show ", "help ", "send ", "check ", "read ", "write ", "call ", "stop ", "start ",
+            "go ", "come ",
         ];
 
         let text_lower = text.to_lowercase();
@@ -453,9 +513,22 @@ impl LinguisticExtractor {
     /// Count filler words.
     fn count_filler_words(&self, words: &[&str]) -> usize {
         const FILLER_WORDS: &[&str] = &[
-            "just", "actually", "basically", "really", "very", "literally",
-            "honestly", "like", "so", "well", "anyway", "anyways",
-            "totally", "completely", "definitely", "absolutely",
+            "just",
+            "actually",
+            "basically",
+            "really",
+            "very",
+            "literally",
+            "honestly",
+            "like",
+            "so",
+            "well",
+            "anyway",
+            "anyways",
+            "totally",
+            "completely",
+            "definitely",
+            "absolutely",
         ];
 
         words
@@ -471,37 +544,76 @@ impl LinguisticExtractor {
     fn count_negative_emotion_words(&self, words: &[&str]) -> usize {
         const NEGATIVE_EMOTION_WORDS: &[&str] = &[
             // Anxiety-specific (LIWC Anxiety category)
-            "worried", "worry", "worries", "worrying",
-            "anxious", "anxiety",
-            "nervous", "nervously",
-            "afraid", "fear", "fears", "feared", "fearful",
-            "scared", "scary",
-            "panic", "panicked", "panicking",
-            "stressed", "stress", "stressful",
-            "tense", "tension",
+            "worried",
+            "worry",
+            "worries",
+            "worrying",
+            "anxious",
+            "anxiety",
+            "nervous",
+            "nervously",
+            "afraid",
+            "fear",
+            "fears",
+            "feared",
+            "fearful",
+            "scared",
+            "scary",
+            "panic",
+            "panicked",
+            "panicking",
+            "stressed",
+            "stress",
+            "stressful",
+            "tense",
+            "tension",
             "uneasy",
-            "dread", "dreading", "dreaded",
+            "dread",
+            "dreading",
+            "dreaded",
             // General negative affect
-            "upset", "upsetting",
-            "frustrated", "frustrating", "frustration",
-            "annoyed", "annoying", "annoyance",
-            "angry", "anger",
+            "upset",
+            "upsetting",
+            "frustrated",
+            "frustrating",
+            "frustration",
+            "annoyed",
+            "annoying",
+            "annoyance",
+            "angry",
+            "anger",
             "mad",
-            "sad", "sadness",
-            "depressed", "depressing", "depression",
-            "hopeless", "hopelessness",
+            "sad",
+            "sadness",
+            "depressed",
+            "depressing",
+            "depression",
+            "hopeless",
+            "hopelessness",
             "miserable",
-            "terrible", "terribly",
+            "terrible",
+            "terribly",
             "awful",
-            "horrible", "horribly",
+            "horrible",
+            "horribly",
             "worst",
             // Distress markers
-            "struggling", "struggle", "struggles",
-            "suffering", "suffer", "suffers",
-            "overwhelmed", "overwhelming",
-            "exhausted", "exhausting", "exhaustion",
-            "desperate", "desperately", "desperation",
-            "helpless", "helplessness",
+            "struggling",
+            "struggle",
+            "struggles",
+            "suffering",
+            "suffer",
+            "suffers",
+            "overwhelmed",
+            "overwhelming",
+            "exhausted",
+            "exhausting",
+            "exhaustion",
+            "desperate",
+            "desperately",
+            "desperation",
+            "helpless",
+            "helplessness",
             "stuck",
             "lost",
         ];
@@ -518,11 +630,23 @@ impl LinguisticExtractor {
     /// anxious and depressive cognitive patterns.
     fn count_absolutist_words(&self, words: &[&str]) -> usize {
         const ABSOLUTIST_WORDS: &[&str] = &[
-            "always", "never", "nothing", "everything",
-            "completely", "totally", "absolutely", "entirely",
-            "impossible", "perfectly", "forever",
-            "everyone", "nobody", "nowhere", "anywhere",
-            "constant", "constantly",
+            "always",
+            "never",
+            "nothing",
+            "everything",
+            "completely",
+            "totally",
+            "absolutely",
+            "entirely",
+            "impossible",
+            "perfectly",
+            "forever",
+            "everyone",
+            "nobody",
+            "nowhere",
+            "anywhere",
+            "constant",
+            "constantly",
         ];
 
         words
@@ -542,8 +666,7 @@ impl LinguisticFeatures {
         let length_component = (self.avg_sentence_length / 30.0).clamp(0.0, 1.0);
         let word_component = (self.avg_word_length / 8.0).clamp(0.0, 1.0);
 
-        (0.4 * grade_component + 0.3 * length_component + 0.3 * word_component)
-            .clamp(0.0, 1.0)
+        (0.4 * grade_component + 0.3 * length_component + 0.3 * word_component).clamp(0.0, 1.0)
     }
 
     /// Get a normalized emotional intensity score [0, 1].
@@ -607,8 +730,7 @@ impl LinguisticFeatures {
         // Less caps/exclamation = more formal
         let emotional_inverse = 1.0 - self.emotional_intensity();
 
-        (0.4 * contraction_inverse + 0.3 * complexity + 0.3 * emotional_inverse)
-            .clamp(0.0, 1.0)
+        (0.4 * contraction_inverse + 0.3 * complexity + 0.3 * emotional_inverse).clamp(0.0, 1.0)
     }
 }
 
@@ -727,9 +849,8 @@ mod tests {
         let absolutist = extractor.extract(
             "Everything is always terrible. Nothing ever works. I can never do anything right.",
         );
-        let balanced = extractor.extract(
-            "Sometimes things work out. Other times they don't. It varies.",
-        );
+        let balanced =
+            extractor.extract("Sometimes things work out. Other times they don't. It varies.");
 
         assert!(absolutist.absolutist_count >= 4);
         assert!(balanced.absolutist_count <= 1);

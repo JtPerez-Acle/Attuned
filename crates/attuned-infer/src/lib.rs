@@ -45,17 +45,17 @@
 #![deny(missing_docs)]
 #![deny(rustdoc::broken_intra_doc_links)]
 
-mod estimate;
-mod features;
-mod engine;
 mod bayesian;
 mod delta;
+mod engine;
+mod estimate;
+mod features;
 
-pub use estimate::{
-    AxisEstimate, InferenceSource, InferredState,
-    max_confidence_for_axis, word_count_confidence_factor,
-};
-pub use features::{LinguisticFeatures, LinguisticExtractor};
-pub use engine::{infer, InferenceEngine, InferenceConfig};
 pub use bayesian::{BayesianUpdater, Prior};
-pub use delta::{DeltaAnalyzer, DeltaSignals, Baseline};
+pub use delta::{Baseline, DeltaAnalyzer, DeltaSignals};
+pub use engine::{infer, InferenceConfig, InferenceEngine};
+pub use estimate::{
+    max_confidence_for_axis, word_count_confidence_factor, AxisEstimate, InferenceSource,
+    InferredState,
+};
+pub use features::{LinguisticExtractor, LinguisticFeatures};
