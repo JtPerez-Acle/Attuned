@@ -385,7 +385,7 @@ impl InferredState {
                     // Existing self-report dominates
                     continue;
                 }
-                Some(existing) if new_estimate.source.is_self_report() => {
+                Some(_existing) if new_estimate.source.is_self_report() => {
                     // New self-report dominates
                     self.estimates.insert(axis, new_estimate);
                 }
