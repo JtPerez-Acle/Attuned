@@ -307,3 +307,130 @@ class TestAxisCategories:
         assert by_category["preferences"] == 4
         assert by_category["control"] == 4
         assert by_category["safety"] == 2
+
+
+class TestInference:
+    """Tests for inference functionality."""
+
+    def test_infer_function(self):
+        from attuned import infer
+        
+        state = infer("I need this done ASAP!!!")
+        
+        assert len(state) > 0
+        assert not state.is_empty()
+        
+        # Should detect urgency
+        urgency = state.get("urgency_sensitivity")
+        assert urgency is not None
+        assert 0.0 <= urgency.value <= 1.0
+        assert 0.0 <= urgency.confidence <= 1.0
+    
+    def test_inference_engine(self):
+        from attuned import InferenceEngine
+        
+        engine = InferenceEngine()
+        state = engine.infer("Help me please!")
+        
+        assert len(state) > 0
+        for estimate in state.all():
+            assert estimate.axis is not None
+            assert 0.0 <= estimate.value <= 1.0
+            assert 0.0 <= estimate.confidence <= 1.0
+    
+    def test_extract_features(self):
+        from attuned import extract_features
+        
+        features = extract_features("This is a test sentence! Another one here.")
+        
+        assert features.word_count == 8
+        assert features.sentence_count == 2
+        assert features.exclamation_ratio > 0
+        assert 0.0 <= features.urgency_score() <= 1.0
+        assert 0.0 <= features.formality_score() <= 1.0
+    
+    def test_inference_source(self):
+        from attuned import infer
+        
+        state = infer("I definitely need this NOW!")
+        
+        for estimate in state.all():
+            source = estimate.source
+            # All inferred values should not be self-report
+            assert source.is_inferred()
+            assert not source.is_self_report()
+            assert source.source_type == "linguistic"
+            assert source.features_used is not None
+    
+    def test_self_report_override(self):
+        from attuned import infer
+        
+        state = infer("I am calm and relaxed.")
+        
+        # Override with self-report
+        state.override_with_self_report("anxiety_level", 0.9)
+        
+        anxiety = state.get("anxiety_level")
+        assert anxiety is not None
+        assert anxiety.value == pytest.approx(0.9, abs=0.001)
+        assert anxiety.confidence == pytest.approx(1.0, abs=0.001)
+        assert anxiety.source.is_self_report()
+    
+    def test_inferred_state_to_dict(self):
+        from attuned import infer
+        
+        state = infer("Please help me!")
+        
+        # Simple dict
+        simple = state.to_dict()
+        assert isinstance(simple, dict)
+        for key, value in simple.items():
+            assert isinstance(key, str)
+            assert isinstance(value, float)
+            assert 0.0 <= value <= 1.0
+    
+    def test_confidence_bounded(self):
+        from attuned import infer
+        
+        state = infer("I ABSOLUTELY NEED THIS RIGHT NOW!!!")
+        
+        for estimate in state.all():
+            # Inferred confidence should be capped at 0.7
+            if estimate.source.is_inferred():
+                assert estimate.confidence <= 0.7
+    
+    def test_axis_estimate_json(self):
+        from attuned import infer
+        import json
+        
+        state = infer("Hello there!")
+        
+        for estimate in state.all():
+            json_str = estimate.to_json()
+            parsed = json.loads(json_str)
+            assert "axis" in parsed
+            assert "value" in parsed
+            assert "confidence" in parsed
+            break  # Only test first one
+    
+    def test_linguistic_features_computed_scores(self):
+        from attuned import extract_features
+        
+        # Formal text
+        formal = extract_features("I hereby request your immediate attention to this matter.")
+        
+        # Informal text
+        informal = extract_features("hey can u help me plz?? lol")
+        
+        # Formal should have higher formality score
+        assert formal.formality_score() > informal.formality_score()
+    
+    def test_empty_text(self):
+        from attuned import infer, extract_features
+        
+        # Should not crash on empty text
+        state = infer("")
+        features = extract_features("")
+        
+        assert features.word_count == 0
+        assert features.sentence_count == 0
