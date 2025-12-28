@@ -30,3 +30,13 @@ coverage/
 *.tmp
 *.temp
 *.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.so
+.venv/
+*.egg-info/
+dist/
+build/

@@ -7,11 +7,16 @@ use pyo3::prelude::*;
 
 mod axes;
 mod client;
+mod infer;
 mod snapshot;
 mod translator;
 
 use axes::{PyAxisCategory, PyAxisDefinition};
 use client::PyAttunedClient;
+use infer::{
+    extract_features, infer_text, PyAxisEstimate, PyInferenceEngine, PyInferenceSource,
+    PyInferredState, PyLinguisticFeatures,
+};
 use snapshot::{PySource, PyStateSnapshot, PyStateSnapshotBuilder};
 use translator::{PyPromptContext, PyRuleTranslator, PyThresholds, PyVerbosity};
 
@@ -86,6 +91,13 @@ fn _attuned(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyAxisDefinition>()?;
     m.add_class::<PyAxisCategory>()?;
 
+    // Inference types
+    m.add_class::<PyInferenceEngine>()?;
+    m.add_class::<PyInferredState>()?;
+    m.add_class::<PyAxisEstimate>()?;
+    m.add_class::<PyInferenceSource>()?;
+    m.add_class::<PyLinguisticFeatures>()?;
+
     // HTTP client
     m.add_class::<PyAttunedClient>()?;
 
@@ -94,6 +106,10 @@ fn _attuned(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(is_valid_axis_name, m)?)?;
     m.add_function(wrap_pyfunction!(get_axis_names, m)?)?;
     m.add_function(wrap_pyfunction!(get_all_axes, m)?)?;
+
+    // Inference functions
+    m.add_function(wrap_pyfunction!(infer_text, m)?)?;
+    m.add_function(wrap_pyfunction!(extract_features, m)?)?;
 
     Ok(())
 }

@@ -58,6 +58,23 @@ For axis governance information:
     >>> axis = get_axis("cognitive_load")
     >>> print(axis.description)
     >>> print(axis.forbidden_uses)  # What this axis must NEVER be used for
+
+Inference from text:
+    >>> from attuned import infer, InferenceEngine
+    >>>
+    >>> # Quick inference
+    >>> state = infer("I need this done ASAP!!!")
+    >>> print(state.get("urgency_sensitivity").value)  # ~0.7
+    >>>
+    >>> # With engine (better for repeated inference)
+    >>> engine = InferenceEngine()
+    >>> state = engine.infer("I'm feeling overwhelmed...")
+    >>>
+    >>> # Full transparency - see how each estimate was derived
+    >>> for estimate in state.all():
+    ...     print(f"{estimate.axis}: {estimate.value:.2f}")
+    ...     print(f"  Confidence: {estimate.confidence:.2f}")
+    ...     print(f"  Source: {estimate.source}")
 """
 
 from attuned._attuned import (
@@ -76,6 +93,13 @@ from attuned._attuned import (
     AxisDefinition,
     AxisCategory,
 
+    # Inference types
+    InferenceEngine,
+    InferredState,
+    AxisEstimate,
+    InferenceSource,
+    LinguisticFeatures,
+
     # HTTP client
     AttunedClient,
 
@@ -84,6 +108,10 @@ from attuned._attuned import (
     is_valid_axis_name,
     get_axis_names,
     get_all_axes,
+
+    # Inference functions
+    infer,
+    extract_features,
 )
 
 # Simple API - the primary interface
@@ -110,6 +138,13 @@ __all__ = [
     "AxisDefinition",
     "AxisCategory",
 
+    # Inference types
+    "InferenceEngine",
+    "InferredState",
+    "AxisEstimate",
+    "InferenceSource",
+    "LinguisticFeatures",
+
     # HTTP client
     "AttunedClient",
 
@@ -118,6 +153,10 @@ __all__ = [
     "is_valid_axis_name",
     "get_axis_names",
     "get_all_axes",
+
+    # Inference functions
+    "infer",
+    "extract_features",
 
     # Constants
     "CANONICAL_AXES",
