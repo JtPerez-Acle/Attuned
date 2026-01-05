@@ -21,11 +21,11 @@ attuned-core = { workspace = true }
 attuned-infer = { workspace = true }
 
 # PyO3 for Python bindings
-pyo3 = { version = "0.24", features = ["extension-module", "abi3-py39"] }
+pyo3 = { version = "0.27", features = ["extension-module", "abi3-py39"] }
 
 # Async support for HTTP client
 tokio = { workspace = true }
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.13", default-features = false, features = ["json", "rustls-tls"] }
 
 # Serialization
 serde = { workspace = true }
@@ -38,4 +38,4 @@ thiserror = { workspace = true }
 pyo3-build-config = "0.24"
 
 [dev-dependencies]
-pyo3 = { version = "0.24", features = ["auto-initialize"] }
+pyo3 = { version = "0.27", features = ["auto-initialize"] }
